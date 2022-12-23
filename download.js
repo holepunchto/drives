@@ -9,14 +9,20 @@ const goodbye = require('graceful-goodbye')
 const Hyperbee = require('hyperbee')
 
 module.exports = async function cmd (key, options = {}) {
-  if (!key) errorAndExit('<drive key> is required')
+  if (!key && !options.corestore) errorAndExit('<drive key> is required')
   if (!options.corestore && !options.localdrive) errorAndExit('At least one is required: --corestore <corestore path> or --localdrive <folder path>')
 
   const swarm = new Hyperswarm()
+
   const store = new Corestore(options.corestore || RAM) // + make a tmp dir instead of ram
-  const drive = new Hyperdrive(store, {
-    _db: makeBee(parsePublicKey(key), store, options.name) // name overrides key
-  })
+
+  let core = null
+  if (key) core = store.get({ key: parsePublicKey(key), cache: true, onwait: null })
+  else core = store.get({ name: options.name || 'db', cache: true, onwait: null })
+
+  const _db = new Hyperbee(core, { keyEncoding: 'utf-8', valueEncoding: 'json', metadata: { contentFeed: null } })
+
+  const drive = new Hyperdrive(store, { _db })
 
   goodbye(() => swarm.destroy(), 1)
   goodbye(() => drive.close(), 2)
