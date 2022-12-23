@@ -24,7 +24,7 @@ module.exports = async function cmd (key, options = {}) {
   console.log('Discovery key:', drive.discoveryKey.toString('hex'))
 
   swarm.on('connection', onconnection)
-  swarm.join(drive.discoveryKey, { server: true, client: false }) // + also client?
+  swarm.join(drive.discoveryKey, { server: true, client: true })
 
   await swarm.flush()
   console.log('Drive is being shared')
