@@ -17,12 +17,13 @@ module.exports = async function cmd (key, options = {}) {
 
   // + reduce code
   const args = this.parent.args // => [ 'mirror', '--localdrive', 'path1', '--corestore', 'path2' ]
+  const pos = key ? 1 : 0
 
-  const from = args[1] // '--localdrive' or '--corestore'
-  const src = args[2] // value
+  const from = args[1 + pos] // '--localdrive' or '--corestore'
+  const src = args[2 + pos] // value
 
-  const to = args[3] // '--localdrive' or '--corestore'
-  const dst = args[4] // value
+  const to = args[3 + pos] // '--localdrive' or '--corestore'
+  const dst = args[4 + pos] // value
 
   const source = getDrive(from, src, { key, name: options.name })
   const destination = getDrive(to, dst, { key, name: options.name })
