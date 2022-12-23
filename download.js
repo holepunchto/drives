@@ -7,6 +7,7 @@ const RAM = require('random-access-memory')
 const z32 = require('z32')
 const goodbye = require('graceful-goodbye')
 const Hyperbee = require('hyperbee')
+// const Seeders = require('@hyperswarm/seeders')
 
 module.exports = async function cmd (key, options = {}) {
   if (!key && !options.corestore) errorAndExit('At least one is required: <drive key> or --corestore <path>')
@@ -40,6 +41,18 @@ module.exports = async function cmd (key, options = {}) {
 
   const done = drive.findingPeers()
   swarm.flush().then(done)
+
+  /* const seeders = new Seeders(drive.key, { dht: swarm.dht, maxClientConnections: 16 })
+  goodbye(() => seeders.destroy(), 1)
+  
+  if (seeders.owner) throw new Error('Not for owners')
+
+  seeders.on('connection', onconnection)
+  const done2 = drive.findingPeers()
+  seeders.join().then(done2, done2) */
+
+  // const updated = await drive.update()
+  // console.log('Updated?', updated)
 
   const dl = drive.download('/') // + or disable sparse?
   // + download progress?
