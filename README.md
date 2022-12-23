@@ -1,6 +1,6 @@
 # drives
 
-CLI to manage, replicate, and mirror a hyperdrive or localdrive.
+CLI to download, replicate, and mirror a hyperdrive or localdrive.
 
 ```
 npm i -g drives
