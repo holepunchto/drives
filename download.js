@@ -54,6 +54,7 @@ module.exports = async function cmd (key, options = {}) {
   // const updated = await drive.update()
   // console.log('Updated?', updated)
 
+  const started = Date.now()
   const dl = drive.download('/') // + or disable sparse?
   // + download progress?
 
@@ -67,10 +68,10 @@ module.exports = async function cmd (key, options = {}) {
 
     await dl // + just in case?
 
-    console.log('Done', mirror.count)
+    console.log('Done in', Date.now() - started, 'ms', mirror.count)
   } else {
     await dl
-    console.log('Done')
+    console.log('Done in', Date.now() - started, 'ms')
   }
 
   // goodbye.exit()
