@@ -51,6 +51,9 @@ module.exports = async function cmd (key, options = {}) {
   const done2 = drive.findingPeers()
   seeders.join().then(done2, done2) */
 
+  // + how do I know that I'm on latest?
+  // because a peer might be replicating an older version, and this CLI will think that it's updated? 
+
   // const updated = await drive.update()
   // console.log('Updated?', updated)
 
