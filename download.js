@@ -46,10 +46,13 @@ module.exports = async function cmd (key, options = {}) {
       console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)
     }
 
-    console.log('Done', mirror.count)
-  }
+    await dl // + just in case?
 
-  await dl // + just in case?
+    console.log('Done', mirror.count)
+  } else {
+    await dl
+    console.log('Done')
+  }
 
   // goodbye.exit()
   await swarm.destroy()
@@ -62,7 +65,7 @@ module.exports = async function cmd (key, options = {}) {
     console.log('Peer connected', remoteInfo)
     socket.on('close', () => console.log('Peer closed', remoteInfo))
 
-    drive.store.replicate(socket) // + is this exposing anything besides the specific drive?
+    drive.corestore.replicate(socket) // + is this exposing anything besides the specific drive?
   }
 }
 
