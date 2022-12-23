@@ -35,6 +35,13 @@ Note: This will create a corestore in RAM!
 drives download my-drive-key --localdrive ./folder
 ```
 
+## Replicate
+
+#### Share a drive
+```bash
+drives replicate my-drive-key --corestore ./path
+```
+
 ## Mirror
 
 #### hyperdrive to localdrive
