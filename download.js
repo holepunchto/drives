@@ -10,7 +10,7 @@ const Hyperbee = require('hyperbee')
 // const Seeders = require('@hyperswarm/seeders')
 
 module.exports = async function cmd (key, options = {}) {
-  if (!key && !options.corestore) errorAndExit('At least one is required: <drive key> or --corestore <path>')
+  if (!key) errorAndExit('<drive key> is required')
   if (!options.corestore && !options.localdrive) errorAndExit('At least one is required: --corestore <path> or --localdrive <folder path>')
 
   const swarm = new Hyperswarm()
