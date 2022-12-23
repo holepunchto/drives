@@ -12,9 +12,6 @@ module.exports = async function cmd (key, options = {}) {
   if (!key) errorAndExit('<drive key> is required')
   if (!options.corestore && !options.localdrive) errorAndExit('At least one is required: --corestore <corestore path> or --localdrive <folder path>')
 
-  if (options.corestore) console.log('Corestore path:', path.resolve(options.corestore))
-  if (options.localdrive) console.log('Localdrive path:', path.resolve(options.localdrive))
-
   const swarm = new Hyperswarm()
   const store = new Corestore(options.corestore || RAM) // + make a tmp dir instead of ram
   const drive = new Hyperdrive(store, {
@@ -26,6 +23,9 @@ module.exports = async function cmd (key, options = {}) {
 
   await drive.ready()
   console.log('Downloading drive...')
+
+  if (options.corestore) console.log('Corestore path:', path.resolve(options.corestore))
+  if (options.localdrive) console.log('Localdrive path:', path.resolve(options.localdrive))
   if (options.name) console.log('Corestore entry name:', options.name)
   console.log('Discovery key:', drive.discoveryKey.toString('hex'))
 
