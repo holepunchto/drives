@@ -36,7 +36,7 @@ module.exports = async function cmd (key, options = {}) {
   const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json']
   if (options.filter) ignore.push(...options.filter)
   const str = ignore.map(key => key.replace(/[\/\.\\\s]/g, '\\$&'))
-  const expr = '\\/(' + str.join('|') + ')(\\/|$)'
+  const expr = '^\\/(' + str.join('|') + ')(\\/|$)'
   const regex = new RegExp(expr)
 
   const mirror = source.mirror(destination, { filter: (key) => regex.test(key) === false })
