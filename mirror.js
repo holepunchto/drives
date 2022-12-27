@@ -14,6 +14,7 @@ const Hyperbee = require('hyperbee')
 module.exports = async function cmd (key, options = {}) {
   if (!options.corestore || typeof options.corestore !== 'string') errorAndExit('--corestore <src/dst> is required')
   if (!options.localdrive || typeof options.localdrive !== 'string') errorAndExit('--localdrive <src/dst> is required')
+  if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] has to be an array')
 
   // + reduce code
   const args = this.parent.args // => [ 'mirror', '--localdrive', 'path1', '--corestore', 'path2' ]
@@ -32,7 +33,13 @@ module.exports = async function cmd (key, options = {}) {
   console.log('Source (' + getDriveType(source) + '):', path.resolve(src))
   console.log('Destination (' + getDriveType(destination) + '):', path.resolve(dst))
 
-  const mirror = source.mirror(destination)
+  const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json']
+  if (options.filter) ignore.push(...options.filter)
+  const str = ignore.map(key => key.replace(/[\/\.\\\s]/g, '\\$&'))
+  const expr = '\\/(' + str.join('|') + ')(\\/|$)'
+  const regex = new RegExp(expr)
+
+  const mirror = source.mirror(destination, { filter: (key) => regex.test(key) === false })
 
   for await (const diff of mirror) {
     console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)

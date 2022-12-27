@@ -34,6 +34,7 @@ program.command('mirror')
   .option('--corestore <path>', 'Corestore path')
   .option('--localdrive <path>', 'Localdrive path')
   .option('--name [value]', 'Hyperdrive name in the corestore')
+  .option('--filter [ignore...]', 'Ignore entries')
   .action(mirror)
 
 program.command('info')

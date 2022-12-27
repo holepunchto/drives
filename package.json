@@ -28,6 +28,7 @@
     "hyperdrive": "^11.0.0-alpha.10",
     "hyperswarm": "^4.3.5",
     "localdrive": "^1.4.0",
+    "mirror-drive": "github:holepunchto/mirror-drive#ensure-filter",
     "random-access-memory": "^6.1.0",
     "z32": "^1.0.0"
   },
