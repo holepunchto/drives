@@ -4,9 +4,8 @@ const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
 const Hyperswarm = require('hyperswarm')
 const RAM = require('random-access-memory')
-const z32 = require('z32')
 const goodbye = require('graceful-goodbye')
-const Hyperbee = require('hyperbee')
+const HypercoreId = require('hypercore-id-encoding')
 // const Seeders = require('@hyperswarm/seeders')
 
 module.exports = async function cmd (key, options = {}) {
@@ -16,14 +15,7 @@ module.exports = async function cmd (key, options = {}) {
   const swarm = new Hyperswarm()
 
   const store = new Corestore(options.corestore || RAM) // + make a tmp dir instead of ram
-
-  let core = null
-  if (key) core = store.get({ key: parsePublicKey(key), cache: true, onwait: null })
-  else core = store.get({ name: options.name || 'db', cache: true, onwait: null })
-
-  const _db = new Hyperbee(core, { keyEncoding: 'utf-8', valueEncoding: 'json', metadata: { contentFeed: null } })
-
-  const drive = new Hyperdrive(store, { _db })
+  const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
 
   goodbye(() => swarm.destroy(), 1)
   goodbye(() => drive.close(), 2)
@@ -33,8 +25,8 @@ module.exports = async function cmd (key, options = {}) {
 
   if (options.corestore) console.log('Corestore path:', path.resolve(options.corestore))
   if (options.localdrive) console.log('Localdrive path:', path.resolve(options.localdrive))
-  if (options.name) console.log('Corestore entry name:', options.name)
   console.log('Discovery key:', drive.discoveryKey.toString('hex'))
+  console.log()
 
   swarm.on('connection', onconnection)
   swarm.join(drive.discoveryKey, { server: false, client: true })
@@ -44,7 +36,7 @@ module.exports = async function cmd (key, options = {}) {
 
   /* const seeders = new Seeders(drive.key, { dht: swarm.dht, maxClientConnections: 16 })
   goodbye(() => seeders.destroy(), 1)
-  
+
   if (seeders.owner) throw new Error('Not for owners')
 
   seeders.on('connection', onconnection)
@@ -52,10 +44,11 @@ module.exports = async function cmd (key, options = {}) {
   seeders.join().then(done2, done2) */
 
   // + how do I know that I'm on latest?
-  // because a peer might be replicating an older version, and this CLI will think that it's updated? 
+  // because a peer might be replicating an older version, and this CLI will think that it's updated?
 
-  // const updated = await drive.update()
-  // console.log('Updated?', updated)
+  await drive.update() // This is needed so drive.download('/') doesn't get stuck on first run
+
+  // + just check prev vs current version?
 
   const started = Date.now()
   const dl = drive.download('/') // + or disable sparse?
@@ -66,9 +59,11 @@ module.exports = async function cmd (key, options = {}) {
     const mirror = drive.mirror(out)
 
     for await (const diff of mirror) {
+      // + verbose option, some colors, status
       console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)
     }
 
+    // console.log('(Mirror done)')
     await dl // + just in case?
 
     console.log('Done in', Date.now() - started, 'ms', mirror.count)
@@ -84,28 +79,13 @@ module.exports = async function cmd (key, options = {}) {
 
   function onconnection (socket) {
     const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
+    const pk = HypercoreId.encode(socket.remotePublicKey)
 
-    console.log('Peer connected', remoteInfo)
-    socket.on('close', () => console.log('Peer closed', remoteInfo))
+    console.log('(Swarm) Peer connected', remoteInfo, pk, '(total ' + swarm.connections.size + ')')
+    socket.on('close', () => console.log('(Swarm) Peer closed', remoteInfo, pk, '(total ' + swarm.connections.size + ')'))
 
-    drive.corestore.replicate(socket) // + is this exposing anything besides the specific drive?
+    drive.corestore.replicate(socket)
   }
-}
-
-// + make hyperdrive to support passing opts.name which overrides key
-function makeBee (key, corestore, name) {
-  const metadataOpts = key && !name
-    ? { key, cache: true }
-    : { name: name || 'db', cache: true }
-  const core = corestore.get(metadataOpts)
-  const metadata = { contentFeed: null }
-  return new Hyperbee(core, { keyEncoding: 'utf-8', valueEncoding: 'json', metadata })
-}
-
-function parsePublicKey (key) {
-  if (typeof key === 'string' && key.length === 52) return z32.decode(key)
-  if (typeof key === 'string' && key.length === 64) return Buffer.from(key, 'hex')
-  return key
 }
 
 function errorAndExit (message) {

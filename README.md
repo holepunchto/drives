@@ -29,7 +29,7 @@ drives download my-drive-key --corestore ./path
 Optionally add `--localdrive <path>` to output the content into a folder.
 
 #### Save it into a localdrive
-Note: This will create a corestore in RAM!
+Warning: This will create a corestore in RAM!
 
 ```bash
 drives download my-drive-key --localdrive ./folder
@@ -39,7 +39,7 @@ drives download my-drive-key --localdrive ./folder
 
 #### Share a drive
 ```bash
-drives replicate my-drive-key --corestore ./path
+drives replicate [my-drive-key] --corestore ./path
 ```
 
 ## Mirror
@@ -49,14 +49,14 @@ drives replicate my-drive-key --corestore ./path
 drives mirror [my-drive-key] --corestore ./input-path --localdrive ./output-path
 ```
 
-#### localdrive to hyperdrive
-```bash
-drives mirror --localdrive ./input-path --corestore ./output-path
-```
-
 #### hyperdrive to hyperdrive
 ```bash
 drives mirror [my-drive-key] --corestore ./input-path --corestore ./output-path
+```
+
+#### localdrive to hyperdrive
+```bash
+drives mirror --localdrive ./input-path --corestore ./output-path
 ```
 
 #### localdrive to localdrive
