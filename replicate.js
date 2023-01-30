@@ -17,6 +17,7 @@ module.exports = async function cmd (key, options = {}) {
   await drive.ready()
   console.log('Replicating drive...')
   console.log('Discovery key:', drive.discoveryKey.toString('hex'))
+  console.log('Public key:', HypercoreId.encode(drive.key))
 
   swarm.on('connection', onconnection)
   swarm.join(drive.discoveryKey, { server: true, client: true })
