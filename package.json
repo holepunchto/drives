@@ -1,0 +1,38 @@
+{
+  "name": "drives",
+  "version": "0.0.1",
+  "description": "CLI to download, replicate, and mirror a hyperdrive or localdrive",
+  "main": "index.js",
+  "bin": {
+    "drives": "./bin.js"
+  },
+  "scripts": {
+    "test": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holepunchto/drives.git"
+  },
+  "author": "Lucas Barrena (LuKks)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/holepunchto/drives/issues"
+  },
+  "homepage": "https://github.com/holepunchto/drives",
+  "dependencies": {
+    "@hyperswarm/seeders": "^1.1.4",
+    "commander": "^9.4.1",
+    "corestore": "^6.4.0",
+    "graceful-goodbye": "^1.1.0",
+    "hyperbee": "^2.2.0",
+    "hyperdrive": "^11.0.0-alpha.10",
+    "hyperswarm": "^4.3.5",
+    "localdrive": "^1.4.0",
+    "mirror-drive": "github:holepunchto/mirror-drive#ensure-filter",
+    "random-access-memory": "^6.1.0",
+    "z32": "^1.0.0"
+  },
+  "devDependencies": {
+    "standard": "^17.0.0"
+  }
+}
