@@ -5,8 +5,8 @@ const Localdrive = require('localdrive')
 const HypercoreId = require('hypercore-id-encoding')
 
 module.exports = async function cmd (key, options = {}) {
-  if (!options.corestore || typeof options.corestore !== 'string') errorAndExit('--corestore <src/dst> is required')
-  if (!options.localdrive || typeof options.localdrive !== 'string') errorAndExit('--localdrive <src/dst> is required')
+  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <src/dst> is required')
+  if (options.localdrive && typeof options.localdrive !== 'string') errorAndExit('--localdrive <src/dst> is required')
   if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] has to be an array')
 
   // + reduce code
