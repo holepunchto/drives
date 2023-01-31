@@ -1,6 +1,6 @@
 # drives
 
-CLI to download, replicate, and mirror a hyperdrive or localdrive.
+CLI to create, download, seed, and mirror a hyperdrive or localdrive
 
 ```
 npm i -g drives
@@ -10,12 +10,10 @@ npm i -g drives
 ```bash
 Usage: drives [options] [command]
 
-CLI to download, replicate, and mirror a hyperdrive or localdrive
-
 Commands:
   touch [options] <key>      Create a writable hyperdrive
   download [options] <key>   Download a hyperdrive by key
-  replicate [options] [key]  Replicate a hyperdrive to the DHT network
+  seed [options] [key]       Seed a hyperdrive to the DHT network
   mirror [options] [key]     Mirror a drive into another drive
   info [options] [key]       Show info about the hyperdrive
 ```
@@ -45,7 +43,7 @@ drives download my-drive-key --localdrive ./folder
 
 #### Share a drive
 ```bash
-drives replicate [my-drive-key]
+drives seed [my-drive-key]
 ```
 
 #### Mirror hyperdrive to localdrive

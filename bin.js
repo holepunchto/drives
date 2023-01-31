@@ -3,14 +3,14 @@
 const { Command } = require('commander')
 const touch = require('./touch.js')
 const download = require('./download.js')
-const replicate = require('./replicate.js')
+const seed = require('./seed.js')
 const mirror = require('./mirror.js')
 const info = require('./info.js')
 
 const program = new Command()
 
 program
-  .description('CLI to create, download, replicate, and mirror a hyperdrive or localdrive')
+  .description('CLI to create, download, seed, and mirror a hyperdrive or localdrive')
 
 program.command('touch')
   .description('Create a writable hyperdrive')
@@ -26,11 +26,11 @@ program.command('download')
   // .option('--node <host:port>', 'Add node')
   .action(download)
 
-program.command('replicate')
-  .description('Replicate a hyperdrive to the DHT network')
+program.command('seed')
+  .description('Seed a hyperdrive to the DHT network')
   .argument('[key]', 'Drive public key')
   .option('--corestore <path>', 'Corestore path')
-  .action(replicate)
+  .action(seed)
 
 program.command('mirror')
   .description('Mirror a drive into another drive')
