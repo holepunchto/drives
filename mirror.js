@@ -3,31 +3,27 @@ const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
 const HypercoreId = require('hypercore-id-encoding')
+const driveId = require('./drive-id')
 
-module.exports = async function cmd (key, options = {}) {
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <src/dst> is required')
-  if (options.localdrive && typeof options.localdrive !== 'string') errorAndExit('--localdrive <src/dst> is required')
+module.exports = async function cmd (src, dst, options = {}) {
+  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
   if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] has to be an array')
 
-  // + reduce code
-  const args = this.parent.args // => [ 'mirror', '--localdrive', 'path1', '--corestore', 'path2' ]
-  const pos = key ? 1 : 0
+  if (!options.corestore) options.corestore = './corestore'
 
-  const from = args[1 + pos] // '--localdrive' or '--corestore'
-  const src = args[2 + pos] // value
+  const source = getDrive(src, options.corestore)
+  const destination = getDrive(dst, options.corestore)
 
-  const to = args[3 + pos] // '--localdrive' or '--corestore'
-  const dst = args[4 + pos] // value
-
-  const source = getDrive(from, src, key)
-  const destination = getDrive(to, dst, key)
+  const sourceType = getDriveType(source)
+  const destinationType = getDriveType(destination)
 
   console.log('Mirroring drives...')
-  console.log('Source (' + getDriveType(source) + '):', path.resolve(src))
-  console.log('Destination (' + getDriveType(destination) + '):', path.resolve(dst))
+  console.log('Source (' + sourceType + '):', sourceType === 'localdrive' ? path.resolve(src) : (src || 'db (default)'))
+  console.log('Destination (' + destinationType + '):', destinationType === 'localdrive' ? path.resolve(dst) : (dst || 'db (default)'))
+  if (sourceType === 'hyperdrive' || destinationType === 'hyperdrive') console.log('Corestore:', path.resolve(options.corestore))
   console.log()
 
-  const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json']
+  const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json', 'corestore']
   if (options.filter) ignore.push(...options.filter)
   const str = ignore.map(key => key.replace(/[/.\\\s]/g, '\\$&'))
   const expr = '^\\/(' + str.join('|') + ')(\\/|$)'
@@ -43,14 +39,16 @@ module.exports = async function cmd (key, options = {}) {
   console.log('Done', mirror.count)
 }
 
-function getDrive (arg, path, key) {
-  if (arg === '--localdrive') {
-    return new Localdrive(path)
+function getDrive (arg, corestore) {
+  const id = driveId(arg)
+
+  if (id.type === 'path') {
+    return new Localdrive(arg)
   }
 
-  if (arg === '--corestore') {
-    const store = new Corestore(path)
-    return new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
+  if (id.type === 'key') {
+    const store = new Corestore(corestore)
+    return new Hyperdrive(store, arg ? HypercoreId.decode(arg) : null)
   }
 
   errorAndExit('Invalid drive')

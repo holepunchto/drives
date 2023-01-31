@@ -43,25 +43,26 @@ drives replicate [my-drive-key] --corestore ./path
 ```
 
 ## Mirror
+You can always add `--corestore [path]`, by default it's `./corestore`.
 
 #### hyperdrive to localdrive
 ```bash
-drives mirror [my-drive-key] --corestore ./input-path --localdrive ./output-path
+drives mirror <hyperdrive-key> ./output-path
 ```
 
 #### hyperdrive to hyperdrive
 ```bash
-drives mirror [my-drive-key] --corestore ./input-path --corestore ./output-path
+drives mirror <hyperdrive-key> <hyperdrive-key>
 ```
 
 #### localdrive to hyperdrive
 ```bash
-drives mirror --localdrive ./input-path --corestore ./output-path
+drives mirror ./input-path <hyperdrive-key>
 ```
 
 #### localdrive to localdrive
 ```bash
-drives mirror --localdrive ./input-path --localdrive ./output-path
+drives mirror ./input-path ./output-path
 ```
 
 ## License

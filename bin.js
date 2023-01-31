@@ -28,9 +28,9 @@ program.command('replicate')
 
 program.command('mirror')
   .description('Mirror a drive into another drive')
-  .argument('[key]', 'Drive public key')
+  .argument('<src>', 'Source drive (key or path)')
+  .argument('[dst]', 'Destination drive (key or path)')
   .option('--corestore <path>', 'Corestore path')
-  .option('--localdrive <path>', 'Localdrive path')
   .option('--filter [ignore...]', 'Ignore entries')
   .action(mirror)
 
