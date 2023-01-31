@@ -17,10 +17,14 @@ module.exports = async function cmd (src, dst, options = {}) {
   const sourceType = getDriveType(source)
   const destinationType = getDriveType(destination)
 
+  await source.ready()
+  await destination.ready()
+
   console.log('Mirroring drives...')
   console.log('Source (' + sourceType + '):', sourceType === 'localdrive' ? path.resolve(src) : (src || 'db (default)'))
   console.log('Destination (' + destinationType + '):', destinationType === 'localdrive' ? path.resolve(dst) : (dst || 'db (default)'))
   if (sourceType === 'hyperdrive' || destinationType === 'hyperdrive') console.log('Corestore:', path.resolve(options.corestore))
+  if (destinationType === 'hyperdrive') console.log('Hyperdrive key:', HypercoreId.encode(destination.key))
   console.log()
 
   const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json', 'corestore']
