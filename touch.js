@@ -8,10 +8,9 @@ module.exports = async function cmd (options = {}) {
   if (!options.corestore) options.corestore = './corestore'
 
   if (await stat(options.corestore) === null) console.log('Notice: creating new corestore dir')
-  if (!options.namespace) options.namespace = process.hrtime.bigint().toString()
 
   const store = new Corestore(options.corestore)
-  const ns = store.namespace(options.namespace)
+  const ns = store.namespace(process.hrtime.bigint().toString())
   const drive = new Hyperdrive(ns)
   await drive.ready()
 

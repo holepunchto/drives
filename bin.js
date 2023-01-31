@@ -15,7 +15,6 @@ program
 program.command('touch')
   .description('Create a writable hyperdrive')
   .option('--corestore <path>', 'Corestore path')
-  .option('--namespace <ns>', 'Custom namespace')
   .action(touch)
 
 program.command('download')
