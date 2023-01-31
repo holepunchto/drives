@@ -20,7 +20,8 @@ Commands:
   info [options] [key]       Show info about the hyperdrive
 ```
 
-## Touch
+## API
+You can always add `--corestore [path]`, by default it's `./corestore`.
 
 #### Create a writable hyperdrive
 ```bash
@@ -28,48 +29,41 @@ drives touch
 # New drive: <z32 key>
 ```
 
-## Download
-
-#### Save it into a corestore
+#### Download a hyperdrive
 ```bash
 drives download my-drive-key --corestore ./path
 ```
 
 Optionally add `--localdrive <path>` to output the content into a folder.
 
-#### Save it into a localdrive
+#### Download a hyperdrive into a localdrive
 Warning: This will create a corestore in RAM!
 
 ```bash
 drives download my-drive-key --localdrive ./folder
 ```
 
-## Replicate
-
 #### Share a drive
 ```bash
-drives replicate [my-drive-key] --corestore ./path
+drives replicate [my-drive-key]
 ```
 
-## Mirror
-You can always add `--corestore [path]`, by default it's `./corestore`.
-
-#### hyperdrive to localdrive
+#### Mirror hyperdrive to localdrive
 ```bash
 drives mirror <hyperdrive-key> ./output-path
 ```
 
-#### hyperdrive to hyperdrive
+#### Mirror hyperdrive to hyperdrive
 ```bash
 drives mirror <hyperdrive-key> <hyperdrive-key>
 ```
 
-#### localdrive to hyperdrive
+#### Mirror localdrive to hyperdrive
 ```bash
 drives mirror ./input-path <hyperdrive-key>
 ```
 
-#### localdrive to localdrive
+#### Mirror localdrive to localdrive
 ```bash
 drives mirror ./input-path ./output-path
 ```
