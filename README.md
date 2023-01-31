@@ -29,7 +29,7 @@ drives touch
 
 #### Download a Hyperdrive
 ```bash
-drives download my-drive-key --corestore ./path
+drives download <my-drive-key> --corestore ./path
 ```
 
 Optionally add `--localdrive <path>` to output the content into a folder.
