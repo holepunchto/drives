@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { Command } = require('commander')
+const touch = require('./touch.js')
 const download = require('./download.js')
 const replicate = require('./replicate.js')
 const mirror = require('./mirror.js')
@@ -9,7 +10,13 @@ const info = require('./info.js')
 const program = new Command()
 
 program
-  .description('CLI to download, replicate, and mirror a hyperdrive or localdrive')
+  .description('CLI to create, download, replicate, and mirror a hyperdrive or localdrive')
+
+program.command('touch')
+  .description('Create a writable hyperdrive')
+  .option('--corestore <path>', 'Corestore path')
+  .option('--namespace <ns>', 'Custom namespace')
+  .action(touch)
 
 program.command('download')
   .description('Download a hyperdrive by key')

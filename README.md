@@ -13,10 +13,19 @@ Usage: drives [options] [command]
 CLI to download, replicate, and mirror a hyperdrive or localdrive
 
 Commands:
+  touch [options] <key>      Create a writable hyperdrive
   download [options] <key>   Download a hyperdrive by key
   replicate [options] [key]  Replicate a hyperdrive to the DHT network
   mirror [options] [key]     Mirror a drive into another drive
   info [options] [key]       Show info about the hyperdrive
+```
+
+## Touch
+
+#### Create a writable hyperdrive
+```bash
+drives touch
+# New drive: <z32 key>
 ```
 
 ## Download
