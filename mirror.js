@@ -27,13 +27,7 @@ module.exports = async function cmd (src, dst, options = {}) {
   if (destinationType === 'hyperdrive') console.log('Hyperdrive key:', HypercoreId.encode(destination.key))
   console.log()
 
-  const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json', 'corestore']
-  if (options.filter) ignore.push(...options.filter)
-  const str = ignore.map(key => key.replace(/[/.\\\s]/g, '\\$&'))
-  const expr = '^\\/(' + str.join('|') + ')(\\/|$)'
-  const regex = new RegExp(expr)
-
-  const mirror = source.mirror(destination, { filter: (key) => regex.test(key) === false })
+  const mirror = source.mirror(destination, { filter: generateFilter(options.filter) })
 
   for await (const diff of mirror) {
     console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)
@@ -62,6 +56,19 @@ function getDriveType (drive) {
   if (drive instanceof Localdrive) return 'localdrive'
   if (drive instanceof Hyperdrive) return 'hyperdrive'
   errorAndExit('Invalid drive')
+}
+
+function generateFilter (custom) {
+  const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json', 'corestore']
+  if (custom) ignore.push(...custom)
+
+  const str = ignore.map(key => key.replace(/[/.\\\s]/g, '\\$&'))
+  const expr = '^\\/(' + str.join('|') + ')(\\/|$)'
+  const regex = new RegExp(expr)
+
+  return function filter (key) {
+    return regex.test(key) === false
+  }
 }
 
 function errorAndExit (message) {
