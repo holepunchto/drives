@@ -12,7 +12,7 @@ module.exports = async function cmd (src, dst, options = {}) {
   if (!options.corestore) options.corestore = './corestore'
 
   const source = getDrive(src, options.corestore)
-  const destination = getDrive(dst, options.corestore)
+  const destination = getDrive(dst, source.corestore ? source.corestore : options.corestore)
 
   const sourceType = getDriveType(source)
   const destinationType = getDriveType(destination)
@@ -45,8 +45,8 @@ function getDrive (arg, corestore) {
   }
 
   if (id.type === 'key') {
-    const store = new Corestore(corestore)
-    return new Hyperdrive(store, arg ? HypercoreId.decode(arg) : null)
+    const store = typeof corestore === 'string' ? new Corestore(corestore) : corestore // +
+    return new Hyperdrive(store, HypercoreId.decode(arg))
   }
 
   errorAndExit('Invalid drive')
