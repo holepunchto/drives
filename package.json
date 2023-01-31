@@ -29,8 +29,7 @@
     "hyperswarm": "^4.3.7",
     "localdrive": "^1.4.1",
     "mirror-drive": "^1.2.2",
-    "random-access-memory": "^6.1.0",
-    "z32": "^1.0.0"
+    "random-access-memory": "^6.1.0"
   },
   "devDependencies": {
     "standard": "^17.0.0"

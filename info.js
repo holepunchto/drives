@@ -1,11 +1,12 @@
 const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
-const z32 = require('z32')
 const HypercoreId = require('hypercore-id-encoding')
 const fsp = require('fs/promises')
 
 module.exports = async function cmd (key, options = {}) {
-  if (!options.corestore || typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required')
+  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
+  if (!options.corestore) options.corestore = './corestore'
+
   if (await stat(options.corestore) === null) errorAndExit('--corestore path does not exists')
 
   const store = new Corestore(options.corestore)
@@ -13,10 +14,9 @@ module.exports = async function cmd (key, options = {}) {
   await drive.ready()
   console.log('Loading drive info...')
 
-  console.log('Public key (hex):', drive.key.toString('hex'))
-  console.log('Public key (z32):', z32.encode(drive.key))
+  console.log('Public key:', HypercoreId.encode(drive.key))
   console.log('Discovery key:', drive.discoveryKey.toString('hex'))
-  console.log('Version:', drive.version) // + why it always says 1?
+  console.log('Version:', drive.version)
 }
 
 async function stat (path) {
