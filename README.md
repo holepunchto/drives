@@ -1,6 +1,6 @@
 # drives
 
-CLI to create, download, seed, and mirror a hyperdrive or localdrive
+CLI to create, download, seed, and mirror a Hyperdrive or Localdrive
 
 ```
 npm i -g drives
@@ -11,34 +11,34 @@ npm i -g drives
 Usage: drives [options] [command]
 
 Commands:
-  touch [options] <key>      Create a writable hyperdrive
-  download [options] <key>   Download a hyperdrive by key
-  seed [options] [key]       Seed a hyperdrive to the DHT network
-  mirror [options] [key]     Mirror a drive into another drive
-  info [options] [key]       Show info about the hyperdrive
+  touch [options] <key>         Create a writable Hyperdrive
+  download [options] <key>      Download a Hyperdrive by key
+  seed [options] [key]          Seed a Hyperdrive to the DHT network
+  mirror [options] <src> <dst>  Mirror a drive into another drive
+  info [options] [key]          Show info about the Hyperdrive
 ```
 
 ## API
 You can always add `--corestore [path]`, by default it's `./corestore`.
 
-#### Create a writable hyperdrive
+#### Create a writable Hyperdrive
 ```bash
 drives touch
 # New drive: <z32 key>
 ```
 
-#### Download a hyperdrive
+#### Download a Hyperdrive
 ```bash
 drives download my-drive-key --corestore ./path
 ```
 
 Optionally add `--localdrive <path>` to output the content into a folder.
 
-#### Download a hyperdrive into a localdrive
+#### Download a Hyperdrive into a Localdrive
 Warning: This will create a corestore in RAM!
 
 ```bash
-drives download my-drive-key --localdrive ./folder
+drives download <my-drive-key> --localdrive ./folder
 ```
 
 #### Share a drive
