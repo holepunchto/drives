@@ -1,3 +1,5 @@
+// + very basic, it could be a proper module, with buffer support, etc
+
 module.exports = function (id) {
   if (!id) return { type: 'key' }
 
