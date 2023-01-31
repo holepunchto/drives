@@ -46,22 +46,32 @@ drives download my-drive-key --localdrive ./folder
 drives seed [my-drive-key]
 ```
 
-#### Mirror hyperdrive to localdrive
+#### Mirror any drive into another
+Source and destination can be a file system path or a drive key.
+
+```bash
+drives mirror <src> <dst>
+```
+
+## Mirror examples
+Remember: it will use `./corestore` by default.
+
+#### Hyperdrive to Localdrive
 ```bash
 drives mirror <hyperdrive-key> ./output-path
 ```
 
-#### Mirror hyperdrive to hyperdrive
+#### Hyperdrive to Hyperdrive
 ```bash
 drives mirror <hyperdrive-key> <hyperdrive-key>
 ```
 
-#### Mirror localdrive to hyperdrive
+#### Localdrive to Hyperdrive
 ```bash
 drives mirror ./input-path <hyperdrive-key>
 ```
 
-#### Mirror localdrive to localdrive
+#### Localdrive to Localdrive
 ```bash
 drives mirror ./input-path ./output-path
 ```
