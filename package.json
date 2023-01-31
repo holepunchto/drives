@@ -1,7 +1,7 @@
 {
   "name": "drives",
   "version": "0.0.4",
-  "description": "CLI to download, replicate, and mirror a hyperdrive or localdrive",
+  "description": "CLI to create, download, seed, and mirror a hyperdrive or localdrive",
   "main": "index.js",
   "bin": {
     "drives": "./bin.js"
@@ -29,8 +29,7 @@
     "hyperswarm": "^4.3.7",
     "localdrive": "^1.4.1",
     "mirror-drive": "^1.2.2",
-    "random-access-memory": "^6.1.0",
-    "z32": "^1.0.0"
+    "random-access-memory": "^6.1.0"
   },
   "devDependencies": {
     "standard": "^17.0.0"

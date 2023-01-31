@@ -1,6 +1,6 @@
 # drives
 
-CLI to download, replicate, and mirror a hyperdrive or localdrive.
+CLI to create, download, seed, and mirror a Hyperdrive or Localdrive
 
 ```
 npm i -g drives
@@ -10,58 +10,70 @@ npm i -g drives
 ```bash
 Usage: drives [options] [command]
 
-CLI to download, replicate, and mirror a hyperdrive or localdrive
-
 Commands:
-  download [options] <key>   Download a hyperdrive by key
-  replicate [options] [key]  Replicate a hyperdrive to the DHT network
-  mirror [options] [key]     Mirror a drive into another drive
-  info [options] [key]       Show info about the hyperdrive
+  touch [options] <key>         Create a writable Hyperdrive
+  download [options] <key>      Download a Hyperdrive by key
+  seed [options] [key]          Seed a Hyperdrive to the DHT network
+  mirror [options] <src> <dst>  Mirror a drive into another drive
+  info [options] [key]          Show info about the Hyperdrive
 ```
 
-## Download
+## API
+You can always add `--corestore [path]`, by default it's `./corestore`.
 
-#### Save it into a corestore
+#### Create a writable Hyperdrive
 ```bash
-drives download my-drive-key --corestore ./path
+drives touch
+# New drive: <z32 key>
+```
+
+#### Download a Hyperdrive
+```bash
+drives download <my-drive-key> --corestore ./path
 ```
 
 Optionally add `--localdrive <path>` to output the content into a folder.
 
-#### Save it into a localdrive
+#### Download a Hyperdrive into a Localdrive
 Warning: This will create a corestore in RAM!
 
 ```bash
-drives download my-drive-key --localdrive ./folder
+drives download <my-drive-key> --localdrive ./folder
 ```
-
-## Replicate
 
 #### Share a drive
 ```bash
-drives replicate [my-drive-key] --corestore ./path
+drives seed [my-drive-key]
 ```
 
-## Mirror
+#### Mirror any drive into another
+Source and destination can be a file system path or a drive key.
 
-#### hyperdrive to localdrive
 ```bash
-drives mirror [my-drive-key] --corestore ./input-path --localdrive ./output-path
+drives mirror <src> <dst>
 ```
 
-#### hyperdrive to hyperdrive
+## Mirror examples
+Remember: it will use `./corestore` by default.
+
+#### Hyperdrive to Localdrive
 ```bash
-drives mirror [my-drive-key] --corestore ./input-path --corestore ./output-path
+drives mirror <hyperdrive-key> ./output-path
 ```
 
-#### localdrive to hyperdrive
+#### Hyperdrive to Hyperdrive
 ```bash
-drives mirror --localdrive ./input-path --corestore ./output-path
+drives mirror <hyperdrive-key> <hyperdrive-key>
 ```
 
-#### localdrive to localdrive
+#### Localdrive to Hyperdrive
 ```bash
-drives mirror --localdrive ./input-path --localdrive ./output-path
+drives mirror ./input-path <hyperdrive-key>
+```
+
+#### Localdrive to Localdrive
+```bash
+drives mirror ./input-path ./output-path
 ```
 
 ## License

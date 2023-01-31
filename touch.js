@@ -3,20 +3,18 @@ const Hyperdrive = require('hyperdrive')
 const HypercoreId = require('hypercore-id-encoding')
 const fsp = require('fs/promises')
 
-module.exports = async function cmd (key, options = {}) {
+module.exports = async function cmd (options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
   if (!options.corestore) options.corestore = './corestore'
 
-  if (await stat(options.corestore) === null) errorAndExit('--corestore path does not exists')
+  if (await stat(options.corestore) === null) console.log('Notice: creating new corestore dir')
 
   const store = new Corestore(options.corestore)
-  const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
+  const ns = store.namespace(process.hrtime.bigint().toString())
+  const drive = new Hyperdrive(ns)
   await drive.ready()
-  console.log('Loading drive info...')
 
-  console.log('Public key:', HypercoreId.encode(drive.key))
-  console.log('Discovery key:', drive.discoveryKey.toString('hex'))
-  console.log('Version:', drive.version)
+  console.log('New drive:', HypercoreId.encode(drive.key))
 }
 
 async function stat (path) {

@@ -3,37 +3,31 @@ const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
 const HypercoreId = require('hypercore-id-encoding')
+const driveId = require('./drive-id')
 
-module.exports = async function cmd (key, options = {}) {
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <src/dst> is required')
-  if (options.localdrive && typeof options.localdrive !== 'string') errorAndExit('--localdrive <src/dst> is required')
+module.exports = async function cmd (src, dst, options = {}) {
+  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
   if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] has to be an array')
 
-  // + reduce code
-  const args = this.parent.args // => [ 'mirror', '--localdrive', 'path1', '--corestore', 'path2' ]
-  const pos = key ? 1 : 0
+  if (!options.corestore) options.corestore = './corestore'
 
-  const from = args[1 + pos] // '--localdrive' or '--corestore'
-  const src = args[2 + pos] // value
+  const source = getDrive(src, options.corestore)
+  const destination = getDrive(dst, source.corestore ? source.corestore : options.corestore)
 
-  const to = args[3 + pos] // '--localdrive' or '--corestore'
-  const dst = args[4 + pos] // value
+  const sourceType = getDriveType(source)
+  const destinationType = getDriveType(destination)
 
-  const source = getDrive(from, src, key)
-  const destination = getDrive(to, dst, key)
+  await source.ready()
+  await destination.ready()
 
   console.log('Mirroring drives...')
-  console.log('Source (' + getDriveType(source) + '):', path.resolve(src))
-  console.log('Destination (' + getDriveType(destination) + '):', path.resolve(dst))
+  console.log('Source (' + sourceType + '):', sourceType === 'localdrive' ? path.resolve(src) : (src || 'db (default)'))
+  console.log('Destination (' + destinationType + '):', destinationType === 'localdrive' ? path.resolve(dst) : (dst || 'db (default)'))
+  if (sourceType === 'hyperdrive' || destinationType === 'hyperdrive') console.log('Corestore:', path.resolve(options.corestore))
+  if (destinationType === 'hyperdrive') console.log('Hyperdrive key:', HypercoreId.encode(destination.key))
   console.log()
 
-  const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json']
-  if (options.filter) ignore.push(...options.filter)
-  const str = ignore.map(key => key.replace(/[/.\\\s]/g, '\\$&'))
-  const expr = '^\\/(' + str.join('|') + ')(\\/|$)'
-  const regex = new RegExp(expr)
-
-  const mirror = source.mirror(destination, { filter: (key) => regex.test(key) === false })
+  const mirror = source.mirror(destination, { filter: generateFilter(options.filter) })
 
   for await (const diff of mirror) {
     console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)
@@ -43,14 +37,16 @@ module.exports = async function cmd (key, options = {}) {
   console.log('Done', mirror.count)
 }
 
-function getDrive (arg, path, key) {
-  if (arg === '--localdrive') {
-    return new Localdrive(path)
+function getDrive (arg, corestore) {
+  const id = driveId(arg)
+
+  if (id.type === 'path') {
+    return new Localdrive(arg)
   }
 
-  if (arg === '--corestore') {
-    const store = new Corestore(path)
-    return new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
+  if (id.type === 'key') {
+    const store = typeof corestore === 'string' ? new Corestore(corestore) : corestore // +
+    return new Hyperdrive(store, HypercoreId.decode(arg))
   }
 
   errorAndExit('Invalid drive')
@@ -60,6 +56,19 @@ function getDriveType (drive) {
   if (drive instanceof Localdrive) return 'localdrive'
   if (drive instanceof Hyperdrive) return 'hyperdrive'
   errorAndExit('Invalid drive')
+}
+
+function generateFilter (custom) {
+  const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json', 'corestore']
+  if (custom) ignore.push(...custom)
+
+  const str = ignore.map(key => key.replace(/[/.\\\s]/g, '\\$&'))
+  const expr = '^\\/(' + str.join('|') + ')(\\/|$)'
+  const regex = new RegExp(expr)
+
+  return function filter (key) {
+    return regex.test(key) === false
+  }
 }
 
 function errorAndExit (message) {

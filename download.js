@@ -9,7 +9,6 @@ const HypercoreId = require('hypercore-id-encoding')
 // const Seeders = require('@hyperswarm/seeders')
 
 module.exports = async function cmd (key, options = {}) {
-  if (!key) errorAndExit('<drive key> is required')
   if (!options.corestore && !options.localdrive) errorAndExit('At least one is required: --corestore <path> or --localdrive <folder path>')
 
   const swarm = new Hyperswarm()
@@ -25,7 +24,7 @@ module.exports = async function cmd (key, options = {}) {
 
   if (options.corestore) console.log('Corestore path:', path.resolve(options.corestore))
   if (options.localdrive) console.log('Localdrive path:', path.resolve(options.localdrive))
-  console.log('Discovery key:', drive.discoveryKey.toString('hex'))
+  console.log('Public key:', HypercoreId.encode(drive.key))
   console.log()
 
   swarm.on('connection', onconnection)
