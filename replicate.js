@@ -5,7 +5,8 @@ const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
 
 module.exports = async function cmd (key, options = {}) {
-  if (!options.corestore || typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required')
+  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
+  if (!options.corestore) options.corestore = './corestore'
 
   const swarm = new Hyperswarm()
   const store = new Corestore(options.corestore)
