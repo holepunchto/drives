@@ -17,6 +17,7 @@ module.exports = async function cmd (key, options = {}) {
   console.log('Public key:', HypercoreId.encode(drive.key))
   console.log('Discovery key:', drive.discoveryKey.toString('hex'))
   console.log('Version:', drive.version)
+  console.log('Writable?', drive.db.feed.writable)
 }
 
 async function stat (path) {

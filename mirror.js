@@ -2,8 +2,14 @@ const path = require('path')
 const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
+const Hyperswarm = require('hyperswarm')
 const HypercoreId = require('hypercore-id-encoding')
-const driveId = require('./drive-id')
+const driveId = require('./lib/drive-id')
+const goodbye = require('graceful-goodbye')
+const debounceify = require('debounceify')
+const recursiveWatch = require('recursive-watch')
+const crayon = require('tiny-crayon')
+const byteSize = require('tiny-byte-size')
 
 module.exports = async function cmd (src, dst, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -14,27 +20,100 @@ module.exports = async function cmd (src, dst, options = {}) {
   const source = getDrive(src, options.corestore)
   const destination = getDrive(dst, source.corestore ? source.corestore : options.corestore)
 
+  goodbye(() => source.close(), 3)
+  goodbye(() => destination.close(), 3)
+
   const sourceType = getDriveType(source)
   const destinationType = getDriveType(destination)
 
   await source.ready()
   await destination.ready()
 
-  console.log('Mirroring drives...')
-  console.log('Source (' + sourceType + '):', sourceType === 'localdrive' ? path.resolve(src) : (src || 'db (default)'))
-  console.log('Destination (' + destinationType + '):', destinationType === 'localdrive' ? path.resolve(dst) : (dst || 'db (default)'))
-  if (sourceType === 'hyperdrive' || destinationType === 'hyperdrive') console.log('Corestore:', path.resolve(options.corestore))
-  if (destinationType === 'hyperdrive') console.log('Hyperdrive key:', HypercoreId.encode(destination.key))
-  console.log()
+  if (sourceType === 'hyperdrive' || destinationType === 'hyperdrive') {
+    const swarm = new Hyperswarm()
+    goodbye(() => swarm.destroy(), 2)
 
-  const mirror = source.mirror(destination, { filter: generateFilter(options.filter) })
+    const updates = swarming(swarm, [source, destination])
 
-  for await (const diff of mirror) {
-    console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)
-    // + try to close exit while mirroring
+    if (updates.length) {
+      console.log(crayon.gray('Swarming drives...'))
+      await Promise.all(updates)
+      console.log()
+    }
   }
 
-  console.log('Done', mirror.count)
+  console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
+  console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
+  console.log()
+
+  let first = true
+  const mirror = debounceify(async function () {
+    const m = source.mirror(destination, { filter: generateFilter(options.filter) })
+
+    for await (const diff of m) {
+      printDiff(diff)
+    }
+
+    if (first) {
+      first = false
+      console.log('Total files:', m.count.files)
+      console.log()
+    }
+  })
+
+  const unwatch = watch(source, mirror)
+  goodbye(() => unwatch(), 1)
+
+  await mirror()
+}
+
+function watch (drive, cb) {
+  if (drive instanceof Localdrive) {
+    return recursiveWatch(drive.root, cb)
+  }
+
+  if (drive instanceof Hyperdrive) {
+    drive.db.feed.on('append', cb)
+    return () => drive.db.feed.off('append', cb)
+  }
+
+  errorAndExit('Invalid drive')
+}
+
+function swarming (swarm, drives) {
+  const updates = []
+
+  for (const drive of drives) {
+    if (!(drive instanceof Hyperdrive)) continue
+
+    swarm.on('connection', onsocket)
+    swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
+
+    function onsocket (socket) {
+      const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
+      const pk = HypercoreId.encode(socket.remotePublicKey)
+
+      // + logs only on opt-in verbose
+      console.log(crayon.cyan('(Swarm)'), 'Peer connected', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')')
+      socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')'))
+
+      drive.corestore.replicate(socket)
+    }
+
+    const done = drive.findingPeers()
+    swarm.flush().then(done)
+
+    // This is needed so drive.download('/') doesn't get stuck on first run
+    if (drive.update) updates.push(drive.update())
+  }
+
+  return updates
+}
+
+function getDrivePath (arg, type) {
+  if (type === 'localdrive') return path.resolve(arg)
+  if (type === 'hyperdrive') return arg || 'db'
+  errorAndExit('Invalid drive path')
 }
 
 function getDrive (arg, corestore) {
@@ -45,6 +124,8 @@ function getDrive (arg, corestore) {
   }
 
   if (id.type === 'key') {
+    // + store should be created outside somehow
+    // + ram option
     const store = typeof corestore === 'string' ? new Corestore(corestore) : corestore // +
     return new Hyperdrive(store, HypercoreId.decode(arg))
   }
@@ -58,6 +139,7 @@ function getDriveType (drive) {
   errorAndExit('Invalid drive')
 }
 
+// + option to disable default filter?
 function generateFilter (custom) {
   const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json', 'corestore']
   if (custom) ignore.push(...custom)
@@ -69,6 +151,33 @@ function generateFilter (custom) {
   return function filter (key) {
     return regex.test(key) === false
   }
+}
+
+function printDiff (diff) {
+  const OP_COLORS = { add: 'green', remove: 'red', change: 'yellow' }
+  const DIFF_COLORS = { more: 'green', less: 'red', same: 'gray' }
+  const SYMBOLS = { add: '+', remove: '-', change: '~' }
+
+  const color = OP_COLORS[diff.op]
+  const symbol = SYMBOLS[diff.op]
+
+  let bytes = null
+  if (diff.op === 'add') bytes = byteSize(diff.bytesAdded)
+  else if (diff.op === 'remove') bytes = byteSize(diff.bytesRemoved)
+  else bytes = byteSize(diff.bytesAdded)
+
+  bytes = crayon.cyan(bytes)
+
+  if (diff.op === 'change') {
+    const d = diff.bytesAdded - diff.bytesRemoved
+    const symbol = d > 0 ? '+' : '' // (d < 0 ? '' : '')
+    const type = d > 0 ? 'more' : (d < 0 ? 'less' : 'same')
+
+    const color = DIFF_COLORS[type]
+    bytes += ' ' + crayon[color](symbol + byteSize(d))
+  }
+
+  console.log(crayon[color](symbol), crayon[color](diff.key), bytes)
 }
 
 function errorAndExit (message) {
