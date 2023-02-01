@@ -37,7 +37,7 @@ module.exports = async function cmd (src, dst, options = {}) {
   }
 
   const updates = swarming(swarm, [source, destination])
-  if (updates.length) console.log('Swarming drives...')
+  if (updates.length) console.log(crayon.gray('Swarming drives...'))
   await Promise.all(updates)
 
   console.log()
@@ -87,6 +87,7 @@ module.exports = async function cmd (src, dst, options = {}) {
     if (first) {
       first = false
       console.log('First mirror done. Total files:', m.count.files)
+      console.log()
     }
   })
 
@@ -131,8 +132,8 @@ function swarming (swarm, drives) {
       const pk = HypercoreId.encode(socket.remotePublicKey)
 
       // + logs only on opt-in verbose
-      console.log('(Swarm) Peer connected', remoteInfo, pk, '(total ' + swarm.connections.size + ')')
-      socket.on('close', () => console.log('(Swarm) Peer closed', remoteInfo, pk, '(total ' + swarm.connections.size + ')'))
+      console.log(crayon.cyan('(Swarm)'), 'Peer connected', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')')
+      socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')'))
 
       drive.corestore.replicate(socket)
     }
