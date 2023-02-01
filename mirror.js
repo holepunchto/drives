@@ -86,7 +86,6 @@ module.exports = async function cmd (src, dst, options = {}) {
     }
   })
 
-
   const unwatch = watch(source, mirror)
   goodbye(() => unwatch(), 1)
 
