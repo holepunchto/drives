@@ -40,17 +40,6 @@ module.exports = async function cmd (src, dst, options = {}) {
   console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
   console.log()
 
-  /* const isAnyHyperdrive = sourceType === 'hyperdrive' || destinationType === 'hyperdrive'
-  if (isAnyHyperdrive) {
-    console.log(crayon.gray('Corestore:'), crayon.gray(path.resolve(options.corestore)))
-  }
-
-  if (destinationType === 'hyperdrive') {
-    console.log(crayon.gray('Hyperdrive key:', HypercoreId.encode(destination.key)))
-  }
-
-  console.log() */
-
   const replicateOnly = sourceType === 'hyperdrive' && destinationType === 'hyperdrive' && !destination.db.feed.writable
   if (replicateOnly) {
     let prev = null
