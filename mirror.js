@@ -29,8 +29,7 @@ module.exports = async function cmd (src, dst, options = {}) {
   await source.ready()
   await destination.ready()
 
-  const isAnyHyperdrive = sourceType === 'hyperdrive' || destinationType === 'hyperdrive'
-  if (isAnyHyperdrive) {
+  if (sourceType === 'hyperdrive' || destinationType === 'hyperdrive') {
     const swarm = new Hyperswarm()
     goodbye(() => swarm.destroy(), 2)
 
