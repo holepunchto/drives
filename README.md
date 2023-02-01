@@ -11,7 +11,7 @@ npm i -g drives
 Usage: drives [options] [command]
 
 Commands:
-  touch [options] <key>         Create a writable Hyperdrive
+  touch [options]               Create a writable Hyperdrive
   download [options] <key>      Download a Hyperdrive by key
   seed [options] [key]          Seed a Hyperdrive to the DHT network
   mirror [options] <src> <dst>  Mirror a drive into another drive
