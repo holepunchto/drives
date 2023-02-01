@@ -31,11 +31,6 @@ module.exports = async function cmd (src, dst, options = {}) {
   await source.ready()
   await destination.ready()
 
-  const initialVersions = {
-    source: source.version || 0,
-    destination: destination.version || 0
-  }
-
   const updates = swarming(swarm, [source, destination])
   if (updates.length) console.log(crayon.gray('Swarming drives...'))
   await Promise.all(updates)
