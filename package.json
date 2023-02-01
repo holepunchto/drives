@@ -31,7 +31,9 @@
     "localdrive": "^1.4.1",
     "mirror-drive": "^1.2.2",
     "random-access-memory": "^6.1.0",
-    "recursive-watch": "^1.1.4"
+    "recursive-watch": "^1.1.4",
+    "tiny-byte-size": "^1.1.0",
+    "tiny-crayon": "^1.0.5"
   },
   "devDependencies": {
     "standard": "^17.0.0"

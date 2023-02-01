@@ -8,6 +8,8 @@ const driveId = require('./lib/drive-id')
 const goodbye = require('graceful-goodbye')
 const debounceify = require('debounceify')
 const recursiveWatch = require('recursive-watch')
+const crayon = require('tiny-crayon')
+const byteSize = require('tiny-byte-size')
 
 module.exports = async function cmd (src, dst, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -34,23 +36,25 @@ module.exports = async function cmd (src, dst, options = {}) {
     destination: destination.version || 0
   }
 
-  console.log('Swarming drives...')
-  await swarming(swarm, [source, destination])
+  const updates = swarming(swarm, [source, destination])
+  if (updates.length) console.log('Swarming drives...')
+  await Promise.all(updates)
 
-  console.log('Mirroring drives...')
-  console.log('Source (' + sourceType + '):', getDrivePath(src, sourceType))
-  console.log('Destination (' + destinationType + '):', getDrivePath(dst, destinationType))
+  console.log()
+  console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
+  console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
+  console.log()
 
-  const isAnyHyperdrive = sourceType === 'hyperdrive' || destinationType === 'hyperdrive'
+  /* const isAnyHyperdrive = sourceType === 'hyperdrive' || destinationType === 'hyperdrive'
   if (isAnyHyperdrive) {
-    console.log('Corestore:', path.resolve(options.corestore))
+    console.log(crayon.gray('Corestore:'), crayon.gray(path.resolve(options.corestore)))
   }
 
   if (destinationType === 'hyperdrive') {
-    console.log('Hyperdrive key:', HypercoreId.encode(destination.key))
+    console.log(crayon.gray('Hyperdrive key:', HypercoreId.encode(destination.key)))
   }
 
-  console.log()
+  console.log() */
 
   const replicateOnly = sourceType === 'hyperdrive' && destinationType === 'hyperdrive' && !destination.db.feed.writable
   if (replicateOnly) {
@@ -77,14 +81,13 @@ module.exports = async function cmd (src, dst, options = {}) {
     const m = source.mirror(destination, { filter: generateFilter(options.filter) })
 
     for await (const diff of m) {
-      console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)
+      printDiff(diff)
     }
 
-    if (first || m.count.add || m.count.remove || m.count.change) {
-      console.log('Done', m.count)
+    if (first) {
+      first = false
+      console.log('First mirror done. Total files:', m.count.files)
     }
-
-    first = false
   })
 
 
@@ -143,7 +146,7 @@ function swarming (swarm, drives) {
     // + just check prev vs current version?
   }
 
-  return Promise.all(updates)
+  return updates
 }
 
 function getDrivePath (arg, type) {
@@ -187,6 +190,33 @@ function generateFilter (custom) {
   return function filter (key) {
     return regex.test(key) === false
   }
+}
+
+function printDiff (diff) {
+  const OP_COLORS = { add: 'green', remove: 'red', change: 'yellow' }
+  const DIFF_COLORS = { more: 'green', less: 'red', same: 'gray' }
+  const SYMBOLS = { add: '+', remove: '-', change: '~' }
+
+  const color = OP_COLORS[diff.op]
+  const symbol = SYMBOLS[diff.op]
+
+  let bytes = null
+  if (diff.op === 'add') bytes = byteSize(diff.bytesAdded)
+  else if (diff.op === 'remove') bytes = byteSize(diff.bytesRemoved)
+  else bytes = byteSize(diff.bytesAdded)
+
+  bytes = crayon.cyan(bytes)
+
+  if (diff.op === 'change') {
+    const d = diff.bytesAdded - diff.bytesRemoved
+    const symbol = d > 0 ? '+' : '' // (d < 0 ? '' : '')
+    const type = d > 0 ? 'more' : (d < 0 ? 'less' : 'same')
+
+    const color = DIFF_COLORS[type]
+    bytes += ' ' + crayon[color](symbol + byteSize(d))
+  }
+
+  console.log(crayon[color](symbol), crayon[color](diff.key), bytes)
 }
 
 function errorAndExit (message) {
