@@ -125,8 +125,6 @@ function swarming (swarm, drives) {
 
     // This is needed so drive.download('/') doesn't get stuck on first run
     if (drive.update) updates.push(drive.update())
-
-    // + just check prev vs current version?
   }
 
   return updates
