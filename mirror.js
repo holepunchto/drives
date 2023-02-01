@@ -35,7 +35,7 @@ module.exports = async function cmd (src, dst, options = {}) {
   if (updates.length) console.log(crayon.gray('Swarming drives...'))
   await Promise.all(updates)
 
-  console.log()
+  if (updates.length) console.log()
   console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
   console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
   console.log()
@@ -81,7 +81,7 @@ module.exports = async function cmd (src, dst, options = {}) {
 
     if (first) {
       first = false
-      console.log('First mirror done. Total files:', m.count.files)
+      console.log('Total files:', m.count.files)
       console.log()
     }
   })
