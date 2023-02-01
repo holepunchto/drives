@@ -46,9 +46,14 @@ module.exports = async function cmd (src, dst, options = {}) {
   console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
   console.log()
 
-  const replicateOnly = sourceType === 'hyperdrive' && destinationType === 'hyperdrive' && !destination.db.feed.writable
+  // + let mirror throw the error for now
+  /* const replicateOnly = sourceType === 'hyperdrive' && destinationType === 'hyperdrive' && !destination.db.feed.writable
   if (replicateOnly) {
     let prev = null
+
+    // source.download('/')
+    // destination.download('/')
+
     ontick()
 
     // + which event to replace the interval?
@@ -64,7 +69,7 @@ module.exports = async function cmd (src, dst, options = {}) {
     }
 
     return
-  }
+  } */
 
   let first = true
   const mirror = debounceify(async function () {
