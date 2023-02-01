@@ -80,7 +80,6 @@ module.exports = async function cmd (src, dst, options = {}) {
 
   console.log()
 
-  // const replicateOnly = sourceType === 'hyperdrive' && destinationType === 'hyperdrive' && !destination.db.feed.writable
   const replicateOnly = sourceType === 'hyperdrive' && destinationType === 'hyperdrive' && !destination.db.feed.writable
   if (replicateOnly) {
     let prev = null
@@ -107,7 +106,6 @@ module.exports = async function cmd (src, dst, options = {}) {
 
     for await (const diff of m) {
       console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)
-      // + try to close exit while mirroring
     }
 
     if (first || m.count.add || m.count.remove || m.count.change) {
