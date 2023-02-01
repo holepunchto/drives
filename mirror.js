@@ -184,17 +184,3 @@ function errorAndExit (message) {
   console.error('Error:', message)
   process.exit(1)
 }
-
-// const Seeders = require('@hyperswarm/seeders')
-
-/* const seeders = new Seeders(drive.key, { dht: swarm.dht, maxClientConnections: 16 })
-goodbye(() => seeders.destroy(), 1)
-
-if (seeders.owner) throw new Error('Not for owners')
-
-seeders.on('connection', onconnection)
-const done2 = drive.findingPeers()
-seeders.join().then(done2, done2) */
-
-// + how do I know that I'm on latest?
-// because a peer might be replicating an older version, and this CLI will think that it's updated?
