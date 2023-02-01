@@ -85,13 +85,6 @@ module.exports = async function cmd (src, dst, options = {}) {
   goodbye(() => unwatch(), 1)
 
   await mirror()
-
-  // + goodbye.exit()
-  // if (unwatch) unwatch()
-  // await swarm.destroy()
-  // await source.close()
-  // await destination.close()
-  // process.exit()
 }
 
 function watch (drive, cb) {
