@@ -46,31 +46,6 @@ module.exports = async function cmd (src, dst, options = {}) {
   console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
   console.log()
 
-  // + let mirror throw the error for now
-  /* const replicateOnly = sourceType === 'hyperdrive' && destinationType === 'hyperdrive' && !destination.db.feed.writable
-  if (replicateOnly) {
-    let prev = null
-
-    // source.download('/')
-    // destination.download('/')
-
-    ontick()
-
-    // + which event to replace the interval?
-    const t = setInterval(ontick, 50)
-    goodbye(() => clearInterval(t))
-
-    function ontick () {
-      if (prev === destination.version) return
-      prev = destination.version
-
-      console.log('Source version:', source.version)
-      console.log('Destination version:', destination.version)
-    }
-
-    return
-  } */
-
   let first = true
   const mirror = debounceify(async function () {
     const m = source.mirror(destination, { filter: generateFilter(options.filter) })
