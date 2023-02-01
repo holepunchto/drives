@@ -17,11 +17,9 @@ module.exports = async function cmd (src, dst, options = {}) {
 
   if (!options.corestore) options.corestore = './corestore'
 
-  const swarm = new Hyperswarm()
   const source = getDrive(src, options.corestore)
   const destination = getDrive(dst, source.corestore ? source.corestore : options.corestore)
 
-  goodbye(() => swarm.destroy(), 2)
   goodbye(() => source.close(), 3)
   goodbye(() => destination.close(), 3)
 
@@ -31,11 +29,20 @@ module.exports = async function cmd (src, dst, options = {}) {
   await source.ready()
   await destination.ready()
 
-  const updates = swarming(swarm, [source, destination])
-  if (updates.length) console.log(crayon.gray('Swarming drives...'))
-  await Promise.all(updates)
+  const isAnyHyperdrive = sourceType === 'hyperdrive' || destinationType === 'hyperdrive'
+  if (isAnyHyperdrive) {
+    const swarm = new Hyperswarm()
+    goodbye(() => swarm.destroy(), 2)
 
-  if (updates.length) console.log()
+    const updates = swarming(swarm, [source, destination])
+
+    if (updates.length) {
+      console.log(crayon.gray('Swarming drives...'))
+      await Promise.all(updates)
+      console.log()
+    }
+  }
+
   console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
   console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
   console.log()
