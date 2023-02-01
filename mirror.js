@@ -7,7 +7,7 @@ const HypercoreId = require('hypercore-id-encoding')
 const driveId = require('./lib/drive-id')
 const goodbye = require('graceful-goodbye')
 const debounceify = require('debounceify')
-const watch = require('recursive-watch')
+const recursiveWatch = require('recursive-watch')
 
 module.exports = async function cmd (src, dst, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -34,36 +34,8 @@ module.exports = async function cmd (src, dst, options = {}) {
     destination: destination.version || 0
   }
 
-  console.log('Swarming drive...')
-  const updates = []
-
-  for (const drive of [source, destination]) {
-    if (!(drive instanceof Hyperdrive)) continue
-
-    swarm.on('connection', onsocket)
-    swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
-
-    function onsocket (socket) {
-      const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
-      const pk = HypercoreId.encode(socket.remotePublicKey)
-
-      // + logs only on opt-in verbose
-      console.log('(Swarm) Peer connected', remoteInfo, pk, '(total ' + swarm.connections.size + ')')
-      socket.on('close', () => console.log('(Swarm) Peer closed', remoteInfo, pk, '(total ' + swarm.connections.size + ')'))
-
-      drive.corestore.replicate(socket)
-    }
-
-    const done = drive.findingPeers()
-    swarm.flush().then(done)
-
-    // This is needed so drive.download('/') doesn't get stuck on first run
-    if (drive.update) updates.push(drive.update())
-
-    // + just check prev vs current version?
-  }
-
-  await Promise.all(updates)
+  console.log('Swarming drives...')
+  await swarming(swarm, [source, destination])
 
   console.log('Mirroring drives...')
   console.log('Source (' + sourceType + '):', getDrivePath(src, sourceType))
@@ -116,16 +88,8 @@ module.exports = async function cmd (src, dst, options = {}) {
   })
 
 
-  let unwatch = null
-  if (source instanceof Localdrive) {
-    unwatch = watch(source.root, mirror)
-    goodbye(() => unwatch(), 1)
-  } else if (source instanceof Hyperdrive) {
-    source.db.feed.on('append', mirror)
-    goodbye(() => source.db.feed.off('append', mirror), 1)
-  } else {
-    errorAndExit('Invalid drive')
-  }
+  const unwatch = watch(source, mirror)
+  goodbye(() => unwatch(), 1)
 
   await mirror()
 
@@ -135,6 +99,51 @@ module.exports = async function cmd (src, dst, options = {}) {
   // await source.close()
   // await destination.close()
   // process.exit()
+}
+
+function watch (drive, cb) {
+  if (drive instanceof Localdrive) {
+    return recursiveWatch(drive.root, cb)
+  }
+
+  if (drive instanceof Hyperdrive) {
+    drive.db.feed.on('append', cb)
+    return () => drive.db.feed.off('append', cb)
+  }
+
+  errorAndExit('Invalid drive')
+}
+
+function swarming (swarm, drives) {
+  const updates = []
+
+  for (const drive of drives) {
+    if (!(drive instanceof Hyperdrive)) continue
+
+    swarm.on('connection', onsocket)
+    swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
+
+    function onsocket (socket) {
+      const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
+      const pk = HypercoreId.encode(socket.remotePublicKey)
+
+      // + logs only on opt-in verbose
+      console.log('(Swarm) Peer connected', remoteInfo, pk, '(total ' + swarm.connections.size + ')')
+      socket.on('close', () => console.log('(Swarm) Peer closed', remoteInfo, pk, '(total ' + swarm.connections.size + ')'))
+
+      drive.corestore.replicate(socket)
+    }
+
+    const done = drive.findingPeers()
+    swarm.flush().then(done)
+
+    // This is needed so drive.download('/') doesn't get stuck on first run
+    if (drive.update) updates.push(drive.update())
+
+    // + just check prev vs current version?
+  }
+
+  return Promise.all(updates)
 }
 
 function getDrivePath (arg, type) {
