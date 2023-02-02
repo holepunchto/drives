@@ -3,6 +3,7 @@ const Hyperdrive = require('hyperdrive')
 const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
+const crayon = require('tiny-crayon')
 
 module.exports = async function cmd (key, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -16,24 +17,25 @@ module.exports = async function cmd (key, options = {}) {
   goodbye(() => drive.close(), 2)
 
   await drive.ready()
-  console.log('Replicating drive...')
-  console.log('Public key:', HypercoreId.encode(drive.key))
 
-  swarm.on('connection', onconnection)
-  swarm.join(drive.discoveryKey, { server: true, client: true })
+  console.log(crayon.gray('Seeding drive...'))
+  console.log('Key:', crayon.magenta(HypercoreId.encode(drive.key)))
+  console.log()
 
-  swarm.flush().then(() => {
-    console.log('(Swarm) Drive is being shared')
-  })
+  swarm.on('connection', onsocket)
+  const discovery = swarm.join(drive.discoveryKey)
 
-  function onconnection (socket) {
+  await discovery.flushed()
+  console.log(crayon.cyan('(Swarm)'), 'Drive is being shared')
+
+  function onsocket (socket) {
     const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
     const pk = HypercoreId.encode(socket.remotePublicKey)
 
-    console.log('(Swarm) Peer connected', remoteInfo, pk, '(total ' + swarm.connections.size + ')')
-    socket.on('close', () => console.log('(Swarm) Peer closed', remoteInfo, pk, '(total ' + swarm.connections.size + ')'))
+    console.log(crayon.cyan('(Swarm)'), 'Peer opened (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk))
+    socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk)))
 
-    drive.corestore.replicate(socket) // + how do I replicate only the specific drive? and not the entire store
+    drive.corestore.replicate(socket)
   }
 }
 
