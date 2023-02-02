@@ -12,8 +12,9 @@ const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
 
 module.exports = async function cmd (src, dst, options = {}) {
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
-  if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] has to be an array')
+  if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
+  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> must be a string')
+  if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] must be an array')
 
   if (!options.corestore) options.corestore = './corestore'
 
@@ -48,7 +49,7 @@ module.exports = async function cmd (src, dst, options = {}) {
 
   let first = true
   const mirror = debounceify(async function () {
-    const m = source.mirror(destination, { filter: generateFilter(options.filter) })
+    const m = source.mirror(destination, { prefix: options.prefix || '/', filter: generateFilter(options.filter) })
 
     for await (const diff of m) {
       printDiff(diff)
@@ -61,8 +62,10 @@ module.exports = async function cmd (src, dst, options = {}) {
     }
   })
 
-  const unwatch = watch(source, mirror)
-  goodbye(() => unwatch(), 1)
+  if (options.live) {
+    const unwatch = watch(source, mirror)
+    goodbye(() => unwatch(), 1)
+  }
 
   await mirror()
 }
