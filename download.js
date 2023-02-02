@@ -7,81 +7,56 @@ const RAM = require('random-access-memory')
 const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
 // const Seeders = require('@hyperswarm/seeders')
+const crayon = require('tiny-crayon')
 
 module.exports = async function cmd (key, options = {}) {
-  if (!options.corestore && !options.localdrive) errorAndExit('At least one is required: --corestore <path> or --localdrive <folder path>')
+  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> must be a string')
+  if (!options.corestore) options.corestore = './corestore'
 
   const swarm = new Hyperswarm()
-
-  const store = new Corestore(options.corestore || RAM) // + make a tmp dir instead of ram
+  const store = new Corestore(options.corestore)
   const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
 
   goodbye(() => swarm.destroy(), 1)
   goodbye(() => drive.close(), 2)
 
   await drive.ready()
-  console.log('Downloading drive...')
-
-  if (options.corestore) console.log('Corestore path:', path.resolve(options.corestore))
-  if (options.localdrive) console.log('Localdrive path:', path.resolve(options.localdrive))
-  console.log('Public key:', HypercoreId.encode(drive.key))
+  console.log(crayon.gray('Downloading drive...'))
+  console.log('Key:', crayon.magenta(HypercoreId.encode(drive.key)))
   console.log()
 
-  swarm.on('connection', onconnection)
+  swarm.on('connection', onsocket)
   swarm.join(drive.discoveryKey, { server: false, client: true })
 
-  const done = drive.findingPeers()
-  swarm.flush().then(done)
+  const done = drive.corestore.findingPeers()
+  swarm.flush().then(done, done)
 
-  /* const seeders = new Seeders(drive.key, { dht: swarm.dht, maxClientConnections: 16 })
+  /* const seeders = new Seeders(drive.key, { dht: swarm.dht, maxClientConnections: 8 })
   goodbye(() => seeders.destroy(), 1)
 
   if (seeders.owner) throw new Error('Not for owners')
 
-  seeders.on('connection', onconnection)
-  const done2 = drive.findingPeers()
+  seeders.on('connection', onsocket)
+  const done2 = drive.corestore.findingPeers()
   seeders.join().then(done2, done2) */
-
-  // + how do I know that I'm on latest?
-  // because a peer might be replicating an older version, and this CLI will think that it's updated?
 
   await drive.update() // This is needed so drive.download('/') doesn't get stuck on first run
 
   // + just check prev vs current version?
 
   const started = Date.now()
-  const dl = drive.download('/') // + or disable sparse?
-  // + download progress?
+  await drive.download('/') // + or disable sparse?
+  console.log('Done in', Date.now() - started, 'ms')
 
-  if (options.localdrive) {
-    const out = new Localdrive(options.localdrive)
-    const mirror = drive.mirror(out)
+  goodbye.exit()
 
-    for await (const diff of mirror) {
-      // + verbose option, some colors, status
-      console.log(diff.op, diff.key, 'bytesRemoved:', diff.bytesRemoved, 'bytesAdded:', diff.bytesAdded)
-    }
-
-    // console.log('(Mirror done)')
-    await dl // + just in case?
-
-    console.log('Done in', Date.now() - started, 'ms', mirror.count)
-  } else {
-    await dl
-    console.log('Done in', Date.now() - started, 'ms')
-  }
-
-  // goodbye.exit()
-  await swarm.destroy()
-  await drive.close()
-  process.exit()
-
-  function onconnection (socket) {
+  function onsocket (socket) {
     const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
     const pk = HypercoreId.encode(socket.remotePublicKey)
 
-    console.log('(Swarm) Peer connected', remoteInfo, pk, '(total ' + swarm.connections.size + ')')
-    socket.on('close', () => console.log('(Swarm) Peer closed', remoteInfo, pk, '(total ' + swarm.connections.size + ')'))
+    // + logs only on opt-in verbose
+    console.log(crayon.cyan('(Swarm)'), 'Peer opened (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk))
+    socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk)))
 
     drive.corestore.replicate(socket)
   }
