@@ -29,17 +29,17 @@ module.exports = async function cmd (src, dst, options = {}) {
   await source.ready()
   await destination.ready()
 
-  if (sourceType === 'hyperdrive' || destinationType === 'hyperdrive') {
+  const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
+  if (hyperdrives.length) {
     const swarm = new Hyperswarm()
     goodbye(() => swarm.destroy(), 2)
 
-    const updates = swarming(swarm, [source, destination])
-
-    if (updates.length) {
-      console.log(crayon.gray('Swarming drives...'))
-      await Promise.all(updates)
-      console.log()
+    for (const drive of hyperdrives) {
+      swarming(swarm, drive)
     }
+
+    console.log(crayon.gray('Swarming drives...'))
+    console.log()
   }
 
   console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
@@ -80,34 +80,23 @@ function watch (drive, cb) {
   errorAndExit('Invalid drive')
 }
 
-function swarming (swarm, drives) {
-  const updates = []
+function swarming (swarm, drive) {
+  swarm.on('connection', onsocket)
+  swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
 
-  for (const drive of drives) {
-    if (!(drive instanceof Hyperdrive)) continue
+  function onsocket (socket) {
+    const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
+    const pk = HypercoreId.encode(socket.remotePublicKey)
 
-    swarm.on('connection', onsocket)
-    swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
+    // + logs only on opt-in verbose
+    console.log(crayon.cyan('(Swarm)'), 'Peer connected', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')')
+    socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')'))
 
-    function onsocket (socket) {
-      const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
-      const pk = HypercoreId.encode(socket.remotePublicKey)
-
-      // + logs only on opt-in verbose
-      console.log(crayon.cyan('(Swarm)'), 'Peer connected', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')')
-      socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')'))
-
-      drive.corestore.replicate(socket)
-    }
-
-    const done = drive.corestore.findingPeers()
-    swarm.flush().then(done)
-
-    // This is needed so drive.download('/') doesn't get stuck on first run
-    if (drive.update) updates.push(drive.update())
+    drive.corestore.replicate(socket)
   }
 
-  return updates
+  const done = drive.corestore.findingPeers()
+  swarm.flush().then(done)
 }
 
 function getDrivePath (arg, type) {
