@@ -55,8 +55,9 @@ module.exports = async function cmd (src, dst, options = {}) {
 
     if (first) {
       first = false
+      if (m.count.add || m.count.remove || m.count.change) console.log()
       console.log('Total files:', m.count.files)
-      console.log()
+      if (options.live) console.log()
     }
   })
 
