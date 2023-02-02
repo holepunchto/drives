@@ -1,7 +1,7 @@
 {
   "name": "drives",
   "version": "0.0.6",
-  "description": "CLI to create, download, seed, and mirror a hyperdrive or localdrive",
+  "description": "CLI to download, seed, and mirror a Hyperdrive or Localdrive",
   "main": "index.js",
   "bin": {
     "drives": "./bin.js"

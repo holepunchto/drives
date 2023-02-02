@@ -1,6 +1,6 @@
 # drives
 
-CLI to create, download, seed, and mirror a Hyperdrive or Localdrive
+CLI to download, seed, and mirror a Hyperdrive or Localdrive
 
 ```
 npm i -g drives

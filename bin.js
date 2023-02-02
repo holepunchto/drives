@@ -10,7 +10,7 @@ const info = require('./info.js')
 const program = new Command()
 
 program
-  .description('CLI to create, download, seed, and mirror a hyperdrive or localdrive')
+  .description('CLI to download, seed, and mirror a Hyperdrive or Localdrive')
 
 program.command('touch')
   .description('Create a writable hyperdrive')
