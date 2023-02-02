@@ -12,9 +12,9 @@ Usage: drives [options] [command]
 
 Commands:
   touch [options]               Create a writable Hyperdrive
-  download [options] <key>      Download a Hyperdrive by key
-  seed [options] [key]          Seed a Hyperdrive to the DHT network
   mirror [options] <src> <dst>  Mirror a drive into another drive
+  seed [options] [key]          Seed a Hyperdrive to the DHT network
+  download [options] <key>      Download a Hyperdrive by key
   info [options] [key]          Show info about the Hyperdrive
 ```
 
@@ -27,25 +27,6 @@ drives touch
 # New drive: <z32 key>
 ```
 
-#### Download a Hyperdrive
-```bash
-drives download <my-drive-key> --corestore ./path
-```
-
-Optionally add `--localdrive <path>` to output the content into a folder.
-
-#### Download a Hyperdrive into a Localdrive
-Warning: This will create a corestore in RAM!
-
-```bash
-drives download <my-drive-key> --localdrive ./folder
-```
-
-#### Share a drive
-```bash
-drives seed [my-drive-key]
-```
-
 #### Mirror any drive into another
 Source and destination can be a file system path or a drive key.
 
@@ -53,27 +34,21 @@ Source and destination can be a file system path or a drive key.
 drives mirror <src> <dst>
 ```
 
-## Mirror examples
 Remember: it will use `./corestore` by default.
 
-#### Hyperdrive to Localdrive
+#### Share a drive
 ```bash
-drives mirror <hyperdrive-key> ./output-path
+drives seed [my-drive-key]
 ```
 
-#### Hyperdrive to Hyperdrive
+#### Download a Hyperdrive
 ```bash
-drives mirror <hyperdrive-key> <hyperdrive-key>
+drives download <my-drive-key>
 ```
 
-#### Localdrive to Hyperdrive
+#### Show storage size, version, etc
 ```bash
-drives mirror ./input-path <hyperdrive-key>
-```
-
-#### Localdrive to Localdrive
-```bash
-drives mirror ./input-path ./output-path
+drives info [my-drive-key]
 ```
 
 ## License

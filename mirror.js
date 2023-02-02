@@ -12,8 +12,9 @@ const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
 
 module.exports = async function cmd (src, dst, options = {}) {
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
-  if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] has to be an array')
+  if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
+  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> must be a string')
+  if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] must be an array')
 
   if (!options.corestore) options.corestore = './corestore'
 
@@ -29,26 +30,24 @@ module.exports = async function cmd (src, dst, options = {}) {
   await source.ready()
   await destination.ready()
 
-  if (sourceType === 'hyperdrive' || destinationType === 'hyperdrive') {
+  const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
+  if (hyperdrives.length) {
     const swarm = new Hyperswarm()
     goodbye(() => swarm.destroy(), 2)
 
-    const updates = swarming(swarm, [source, destination])
+    for (const drive of hyperdrives) swarming(swarm, drive)
 
-    if (updates.length) {
-      console.log(crayon.gray('Swarming drives...'))
-      await Promise.all(updates)
-      console.log()
-    }
+    console.log(crayon.gray('Swarming drives...'))
+    console.log()
   }
 
   console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
-  console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
+  console.log(crayon.green('Target'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
   console.log()
 
   let first = true
   const mirror = debounceify(async function () {
-    const m = source.mirror(destination, { filter: generateFilter(options.filter) })
+    const m = source.mirror(destination, { prefix: options.prefix || '/', filter: generateFilter(options.filter) })
 
     for await (const diff of m) {
       printDiff(diff)
@@ -56,15 +55,20 @@ module.exports = async function cmd (src, dst, options = {}) {
 
     if (first) {
       first = false
+      if (m.count.add || m.count.remove || m.count.change) console.log()
       console.log('Total files:', m.count.files)
-      console.log()
+      if (options.live) console.log()
     }
   })
 
-  const unwatch = watch(source, mirror)
-  goodbye(() => unwatch(), 1)
+  if (options.live) {
+    const unwatch = watch(source, mirror)
+    goodbye(() => unwatch(), 1)
+  }
 
   await mirror()
+
+  if (!options.live) goodbye.exit()
 }
 
 function watch (drive, cb) {
@@ -80,34 +84,23 @@ function watch (drive, cb) {
   errorAndExit('Invalid drive')
 }
 
-function swarming (swarm, drives) {
-  const updates = []
+function swarming (swarm, drive) {
+  swarm.on('connection', onsocket)
+  swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
 
-  for (const drive of drives) {
-    if (!(drive instanceof Hyperdrive)) continue
+  function onsocket (socket) {
+    const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
+    const pk = HypercoreId.encode(socket.remotePublicKey)
 
-    swarm.on('connection', onsocket)
-    swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
+    // + logs only on opt-in verbose
+    console.log(crayon.cyan('(Swarm)'), 'Peer opened (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk))
+    socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk)))
 
-    function onsocket (socket) {
-      const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
-      const pk = HypercoreId.encode(socket.remotePublicKey)
-
-      // + logs only on opt-in verbose
-      console.log(crayon.cyan('(Swarm)'), 'Peer connected', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')')
-      socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed', crayon.gray(remoteInfo), crayon.magenta(pk), '(total ' + swarm.connections.size + ')'))
-
-      drive.corestore.replicate(socket)
-    }
-
-    const done = drive.findingPeers()
-    swarm.flush().then(done)
-
-    // This is needed so drive.download('/') doesn't get stuck on first run
-    if (drive.update) updates.push(drive.update())
+    drive.corestore.replicate(socket)
   }
 
-  return updates
+  const done = drive.corestore.findingPeers()
+  swarm.flush().then(done, done)
 }
 
 function getDrivePath (arg, type) {
