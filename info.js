@@ -20,10 +20,11 @@ module.exports = async function cmd (key, options = {}) {
 
   console.log('Key:', crayon.magenta(HypercoreId.encode(drive.key)))
   if (drive.contentKey) console.log('Content key:', crayon.magenta(HypercoreId.encode(drive.contentKey)))
+
   console.log('Version:', drive.version)
   console.log('Writable?', drive.db.feed.writable)
-  if (!drive.blobs) console.log('Drive is empty')
-  else {
+
+  if (drive.blobs) {
     const { storage } = await drive.blobs.core.info({ storage: true })
     console.log('Drive size:', crayon.cyan(byteSize(storage.oplog + storage.tree + storage.blocks + storage.bitfield)))
   }
