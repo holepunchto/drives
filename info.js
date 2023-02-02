@@ -25,9 +25,16 @@ module.exports = async function cmd (key, options = {}) {
   console.log('Writable?', drive.db.feed.writable)
 
   if (drive.blobs) {
-    const { storage } = await drive.blobs.core.info({ storage: true })
-    console.log('Drive size:', crayon.cyan(byteSize(storage.oplog + storage.tree + storage.blocks + storage.bitfield)))
+    const dbInfo = await drive.db.feed.info({ storage: true })
+    const blobsInfo = await drive.blobs.core.info({ storage: true })
+    const total = calculateSize(dbInfo) + calculateSize(blobsInfo)
+
+    console.log('Drive size:', crayon.cyan(byteSize(total)))
   }
+}
+
+function calculateSize (info) {
+  return info.storage.oplog + info.storage.tree + info.storage.blocks + info.storage.bitfield
 }
 
 async function stat (path) {
