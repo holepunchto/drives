@@ -42,7 +42,7 @@ module.exports = async function cmd (key, options = {}) {
   // + just check prev vs current version?
 
   const started = Date.now()
-  await drive.download('/') // + or disable sparse?
+  await drive.download('/')
   console.log('Downloaded in', Date.now() - started, 'ms')
 
   goodbye.exit()
