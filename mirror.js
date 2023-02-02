@@ -100,7 +100,7 @@ function swarming (swarm, drives) {
       drive.corestore.replicate(socket)
     }
 
-    const done = drive.findingPeers()
+    const done = drive.corestore.findingPeers()
     swarm.flush().then(done)
 
     // This is needed so drive.download('/') doesn't get stuck on first run
