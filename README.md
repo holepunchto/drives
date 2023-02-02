@@ -19,6 +19,8 @@ Commands:
 ```
 
 ## API
+Use `drives --help` for more information.
+
 You can always add `--corestore [path]`, by default it's `./corestore`.
 
 #### Create a writable Hyperdrive
@@ -28,11 +30,13 @@ drives touch
 ```
 
 #### Mirror any drive into another
-Source and destination can be a file system path or a drive key.
+Source and destination can be a folder path or a drive key.
 
 ```bash
 drives mirror <src> <dst>
 ```
+
+Use `--live` for real-time mirroring!
 
 Remember: it will use `./corestore` by default.
 
