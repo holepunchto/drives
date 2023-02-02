@@ -35,9 +35,7 @@ module.exports = async function cmd (src, dst, options = {}) {
     const swarm = new Hyperswarm()
     goodbye(() => swarm.destroy(), 2)
 
-    for (const drive of hyperdrives) {
-      swarming(swarm, drive)
-    }
+    for (const drive of hyperdrives) swarming(swarm, drive)
 
     console.log(crayon.gray('Swarming drives...'))
     console.log()
