@@ -67,6 +67,8 @@ module.exports = async function cmd (src, dst, options = {}) {
   }
 
   await mirror()
+
+  if (!options.live) goodbye.exit()
 }
 
 function watch (drive, cb) {
