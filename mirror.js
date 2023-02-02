@@ -42,7 +42,7 @@ module.exports = async function cmd (src, dst, options = {}) {
   }
 
   console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
-  console.log(crayon.green('Destination'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
+  console.log(crayon.green('Target'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
   console.log()
 
   let first = true
