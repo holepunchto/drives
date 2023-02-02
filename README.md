@@ -38,8 +38,6 @@ drives mirror <src> <dst>
 
 Use `--live` for real-time mirroring!
 
-Remember: it will use `./corestore` by default.
-
 #### Share a drive
 ```bash
 drives seed [my-drive-key]
