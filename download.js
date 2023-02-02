@@ -46,7 +46,7 @@ module.exports = async function cmd (key, options = {}) {
 
   const started = Date.now()
   await drive.download('/') // + or disable sparse?
-  console.log('Done in', Date.now() - started, 'ms')
+  console.log('Downloaded in', Date.now() - started, 'ms')
 
   goodbye.exit()
 
