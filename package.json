@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/holepunchto/drives",
   "dependencies": {
-    "@hyperswarm/seeders": "^1.1.4",
     "commander": "^9.4.1",
     "corestore": "^6.4.2",
     "debounceify": "^1.0.0",
@@ -30,7 +29,6 @@
     "hyperswarm": "^4.3.7",
     "localdrive": "^1.4.1",
     "mirror-drive": "^1.2.2",
-    "random-access-memory": "^6.1.0",
     "recursive-watch": "^1.1.4",
     "tiny-byte-size": "^1.1.0",
     "tiny-crayon": "^1.0.5"
