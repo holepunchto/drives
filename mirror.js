@@ -100,7 +100,7 @@ function swarming (swarm, drive) {
   }
 
   const done = drive.corestore.findingPeers()
-  swarm.flush().then(done)
+  swarm.flush().then(done, done)
 }
 
 function getDrivePath (arg, type) {
