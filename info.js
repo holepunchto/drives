@@ -11,12 +11,12 @@ module.exports = async function cmd (key, options = {}) {
 
   if (await stat(options.corestore) === null) errorAndExit('--corestore path does not exists')
 
+  console.log(crayon.gray('Loading drive info...'))
+  console.log()
+
   const store = new Corestore(options.corestore)
   const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
   await drive.ready()
-
-  console.log(crayon.gray('Loading drive info...'))
-  console.log()
 
   console.log('Key:', crayon.magenta(HypercoreId.encode(drive.key)))
   if (drive.contentKey) console.log('Content key:', crayon.magenta(HypercoreId.encode(drive.contentKey)))
