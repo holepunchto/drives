@@ -54,7 +54,7 @@ module.exports = async function cmd (src, options = {}) {
       rs = drive.createReadStream(filename, { start: 0, end: entry.value.blob.byteLength })
     }
 
-    rs.pipe(res)
+    rs.pipe(res, noop)
   })
 
   server.listen(options.port, options.host)
@@ -91,3 +91,5 @@ function errorAndExit (message) {
   console.error('Error:', message)
   process.exit(1)
 }
+
+function noop () {}
