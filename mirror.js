@@ -31,7 +31,7 @@ module.exports = async function cmd (src, dst, options = {}) {
   await destination.ready()
 
   const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
-  if (source instanceof Hyperdrive || options.live && hyperdrives.length) {
+  if (source instanceof Hyperdrive || (options.live && hyperdrives.length)) {
     const swarm = new Hyperswarm()
     goodbye(() => swarm.destroy(), 2)
 
