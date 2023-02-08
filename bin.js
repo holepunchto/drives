@@ -43,7 +43,7 @@ program.command('download')
   .action(download)
 
 program.command('serve')
-  .description('Creates a HTTP Hyperdrive server')
+  .description('Creates a HTTP drive server')
   .argument('<src>', 'Source drive (key or path)')
   .option('--host <address>', 'Bind to address')
   .option('--port <number>', 'Bind to port')
