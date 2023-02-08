@@ -31,19 +31,23 @@ module.exports = async function cmd (src, dst, options = {}) {
   await destination.ready()
 
   const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
-  if (hyperdrives.length) {
+  if (options.live && hyperdrives.length) {
     const swarm = new Hyperswarm()
     goodbye(() => swarm.destroy(), 2)
 
     for (const drive of hyperdrives) swarming(swarm, drive, options)
 
-    console.log(crayon.gray('Swarming drives...'))
-    console.log()
+    if (options.verbose) {
+      console.log(crayon.gray('Swarming drives...'))
+      console.log()
+    }
   }
 
-  console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
-  console.log(crayon.green('Target'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
-  console.log()
+  if (options.verbose) {
+    console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
+    console.log(crayon.green('Target'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
+    console.log()
+  }
 
   let first = true
 
