@@ -19,7 +19,7 @@ Commands:
 ```
 
 ## API
-Use `drives --help` for more information.
+Use `drives --help` for more information. And `drives mirror --help`, etc.
 
 You can always add `--corestore [path]`, by default it's `./corestore`.
 
