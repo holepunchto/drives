@@ -15,6 +15,7 @@ Commands:
   mirror [options] <src> <dst>  Mirror a drive into another drive
   seed [options] [key]          Seed a Hyperdrive to the DHT network
   download [options] <key>      Download a Hyperdrive by key
+  serve [options] <src>         Creates a HTTP drive server
   info [options] [key]          Show info about the Hyperdrive
 ```
 
@@ -48,9 +49,9 @@ drives seed [my-drive-key]
 drives download <my-drive-key>
 ```
 
-#### Serve a Hyperdrive via HTTP
+#### Serve a drive via HTTP
 ```bash
-drives serve <my-drive-key>
+drives serve <key or path>
 # HTTP server on http://localhost:5000
 ```
 
