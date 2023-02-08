@@ -36,7 +36,7 @@ Source and destination can be a folder path or a drive key.
 drives mirror <src> <dst>
 ```
 
-Use `--live` for real-time mirroring!
+Use `--live` for real-time mirroring, and `--verbose` to show all logs.
 
 #### Share a drive
 ```bash
