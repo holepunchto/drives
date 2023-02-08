@@ -34,6 +34,7 @@ module.exports = async function cmd (src, options = {}) {
       return
     }
 
+    res.setHeader('Content-Type', 'application/octet-stream')
     res.setHeader('Accept-Ranges', 'bytes')
 
     let rs
