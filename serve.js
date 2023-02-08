@@ -54,7 +54,7 @@ module.exports = async function cmd (src, options = {}) {
       rs = drive.createReadStream(filename, { start: 0, end: entry.value.blob.byteLength })
     }
 
-    rs.pipe(res, () => {})
+    rs.pipe(res)
   })
 
   server.listen(options.port, options.host)
