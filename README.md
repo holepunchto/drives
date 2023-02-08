@@ -48,6 +48,14 @@ drives seed [my-drive-key]
 drives download <my-drive-key>
 ```
 
+#### Serve a Hyperdrive via HTTP
+```bash
+drives serve <my-drive-key>
+# HTTP server on http://localhost:5000
+```
+
+URL requests are like `/path/to/file`, i.e. `http://localhost:5000/index.js`.
+
 #### Show storage size, version, etc
 ```bash
 drives info [my-drive-key]
