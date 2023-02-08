@@ -24,6 +24,8 @@ program.command('mirror')
   .option('--live', 'Enables real-time sharing')
   .option('--prefix <path>', 'Prefix entries path')
   .option('--filter [ignore...]', 'Ignore entries')
+  .option('--dry-run', 'Disables writing')
+  .option('--verbose', 'Print more information')
   .option('--corestore <path>', 'Corestore path')
   .action(mirror)
 

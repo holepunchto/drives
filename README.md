@@ -19,7 +19,7 @@ Commands:
 ```
 
 ## API
-Use `drives --help` for more information.
+Use `drives --help` for more information, `drives mirror --help`, etc.
 
 You can always add `--corestore [path]`, by default it's `./corestore`.
 
@@ -36,7 +36,7 @@ Source and destination can be a folder path or a drive key.
 drives mirror <src> <dst>
 ```
 
-Use `--live` for real-time mirroring!
+Use `--live` for real-time mirroring, and `--verbose` to show all logs.
 
 #### Share a drive
 ```bash

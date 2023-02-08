@@ -31,32 +31,49 @@ module.exports = async function cmd (src, dst, options = {}) {
   await destination.ready()
 
   const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
-  if (hyperdrives.length) {
+  if (source instanceof Hyperdrive || options.live && hyperdrives.length) {
     const swarm = new Hyperswarm()
     goodbye(() => swarm.destroy(), 2)
 
-    for (const drive of hyperdrives) swarming(swarm, drive)
+    for (const drive of hyperdrives) swarming(swarm, drive, options)
 
-    console.log(crayon.gray('Swarming drives...'))
+    if (options.verbose) {
+      console.log(crayon.gray('Swarming drives...'))
+      console.log()
+    }
+  }
+
+  if (options.verbose) {
+    console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
+    console.log(crayon.green('Target'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
     console.log()
   }
 
-  console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
-  console.log(crayon.green('Target'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
-  console.log()
-
   let first = true
+
   const mirror = debounceify(async function () {
-    const m = source.mirror(destination, { prefix: options.prefix || '/', filter: generateFilter(options.filter) })
+    const m = source.mirror(destination, { prefix: options.prefix || '/', filter: generateFilter(options.filter), dryRun: options.dryRun })
 
     for await (const diff of m) {
-      printDiff(diff)
+      if (options.verbose) {
+        console.log(formatDiff(diff))
+      } else {
+        status(formatDiff(diff), { clear: true })
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
     }
 
     if (first) {
       first = false
-      if (m.count.add || m.count.remove || m.count.change) console.log()
-      console.log('Total files:', m.count.files)
+
+      if (options.verbose) {
+        if (m.count.add || m.count.remove || m.count.change) console.log()
+        console.log(crayon.green('✔'), 'Total files:', m.count.files, '(' + formatCount(m.count) + ')')
+      } else {
+        status(crayon.green('✔') + ' Total files: ' + crayon.yellow(m.count.files) + ' (' + formatCount(m.count) + ')', { clear: true, done: true })
+      }
+
       if (options.live) console.log()
     }
   })
@@ -84,7 +101,7 @@ function watch (drive, cb) {
   errorAndExit('Invalid drive')
 }
 
-function swarming (swarm, drive) {
+function swarming (swarm, drive, options) {
   swarm.on('connection', onsocket)
   swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
 
@@ -92,9 +109,10 @@ function swarming (swarm, drive) {
     const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
     const pk = HypercoreId.encode(socket.remotePublicKey)
 
-    // + logs only on opt-in verbose
-    console.log(crayon.cyan('(Swarm)'), 'Peer opened (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk))
-    socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk)))
+    if (options.verbose) {
+      console.log(crayon.cyan('(Swarm)'), 'Peer opened (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk))
+      socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk)))
+    }
 
     drive.corestore.replicate(socket)
   }
@@ -146,7 +164,7 @@ function generateFilter (custom) {
   }
 }
 
-function printDiff (diff) {
+function formatDiff (diff) {
   const OP_COLORS = { add: 'green', remove: 'red', change: 'yellow' }
   const DIFF_COLORS = { more: 'green', less: 'red', same: 'gray' }
   const SYMBOLS = { add: '+', remove: '-', change: '~' }
@@ -170,7 +188,16 @@ function printDiff (diff) {
     bytes += ' ' + crayon[color](symbol + byteSize(d))
   }
 
-  console.log(crayon[color](symbol), crayon[color](diff.key), bytes)
+  return crayon[color](symbol) + ' ' + crayon[color](diff.key) + ' ' + bytes
+}
+
+function formatCount (count) {
+  return crayon.green('+' + count.add) + ' ' + crayon.red('-' + count.remove) + ' ' + crayon.yellow('~' + count.change)
+}
+
+function status (msg, opts = {}) {
+  const clear = '\x1B[2K\x1B[200D'
+  process.stdout.write((opts.clear ? clear : '') + msg + (opts.done ? '\n' : ''))
 }
 
 function errorAndExit (message) {
