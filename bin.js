@@ -47,6 +47,7 @@ program.command('serve')
   .argument('<src>', 'Source drive (key or path)')
   .option('--host <address>', 'Bind to address')
   .option('--port <number>', 'Bind to port')
+  .option('--verbose', 'Print more information')
   .option('--corestore <path>', 'Corestore path')
   .action(serve)
 

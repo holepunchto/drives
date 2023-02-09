@@ -1,12 +1,14 @@
 const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
+const Hyperswarm = require('hyperswarm')
 const HypercoreId = require('hypercore-id-encoding')
 const driveId = require('./lib/drive-id')
 const http = require('http')
 const rangeParser = require('range-parser')
 const goodbye = require('graceful-goodbye')
 const graceful = require('graceful-http')
+const crayon = require('tiny-crayon')
 
 module.exports = async function cmd (src, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -19,6 +21,29 @@ module.exports = async function cmd (src, options = {}) {
 
   goodbye(() => drive.close(), 2)
   await drive.ready()
+
+  if (drive instanceof Hyperdrive) {
+    const swarm = new Hyperswarm()
+    goodbye(() => swarm.destroy(), 3)
+
+    swarm.on('connection', onsocket)
+    swarm.join(drive.discoveryKey)
+
+    function onsocket (socket) {
+      const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
+      const pk = HypercoreId.encode(socket.remotePublicKey)
+
+      if (options.verbose) {
+        console.log(crayon.cyan('(Swarm)'), 'Peer opened (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk))
+        socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk)))
+      }
+
+      drive.corestore.replicate(socket)
+    }
+
+    const done = drive.corestore.findingPeers()
+    swarm.flush().then(done, done)
+  }
 
   const server = http.createServer(async function (req, res) {
     if (req.method !== 'GET') {
