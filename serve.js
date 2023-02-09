@@ -67,7 +67,16 @@ module.exports = async function cmd (src, options = {}) {
     let rs
 
     if (req.headers.range) {
-      const range = rangeParser(entry.value.blob.byteLength, req.headers.range)[0]
+      const ranges = rangeParser(entry.value.blob.byteLength, req.headers.range)
+
+      if (ranges === -1 || ranges === -2) {
+        res.statusCode = 206
+        res.setHeader('Content-Length', 0)
+        res.end()
+        return
+      }
+
+      const range = ranges[0]
       const byteLength = range.end - range.start + 1
 
       res.statusCode = 206
