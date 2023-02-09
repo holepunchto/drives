@@ -15,7 +15,7 @@ module.exports = async function cmd (src, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
   if (!options.corestore) options.corestore = './corestore'
 
-  options.port = typeof options.port !== 'undefined' ? Number(options.port) : 5000
+  options.port = typeof options.port !== 'undefined' ? Number(options.port) : 7000
   options.host = typeof options.host !== 'undefined' ? options.host : null
 
   const drive = getDrive(src, options.corestore)
@@ -95,6 +95,13 @@ module.exports = async function cmd (src, options = {}) {
   })
 
   server.listen(options.port, options.host)
+
+  if (!options.disableAnyPort) {
+    server.once('error', function (err) {
+      if (err.code !== 'EADDRINUSE') throw err
+      server.listen(0, options.host)
+    })
+  }
 
   const close = graceful(server)
   goodbye(() => close(), 1)
