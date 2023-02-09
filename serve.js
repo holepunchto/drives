@@ -12,8 +12,8 @@ module.exports = async function cmd (src, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
   if (!options.corestore) options.corestore = './corestore'
 
-  if (typeof options.port !== 'number') options.port = 5000
-  if (typeof options.host !== 'string') options.host = null
+  options.port = typeof options.port !== 'undefined' ? Number(options.port) : 5000
+  options.host = typeof options.host !== 'undefined' ? options.host : null
 
   const drive = getDrive(src, options.corestore)
 
