@@ -46,7 +46,7 @@ module.exports = async function cmd (src, options = {}) {
   }
 
   const server = http.createServer(async function (req, res) {
-    if (req.method !== 'GET') {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.writeHead(400).end()
       return
     }
