@@ -72,11 +72,11 @@ module.exports = async function cmd (src, options = {}) {
       res.setHeader('Content-Range', 'bytes ' + range.start + '-' + range.end + '/' + entry.value.blob.byteLength)
       res.setHeader('Content-Length', byteLength)
 
-      rs = drive.createReadStream(filename, { start: range.start, end: byteLength })
+      rs = drive.createReadStream(filename, { start: range.start, length: byteLength })
     } else {
       res.setHeader('Content-Length', entry.value.blob.byteLength)
 
-      rs = drive.createReadStream(filename, { start: 0, end: entry.value.blob.byteLength })
+      rs = drive.createReadStream(filename, { start: 0, length: entry.value.blob.byteLength })
     }
 
     rs.pipe(res, noop)
