@@ -60,8 +60,6 @@ module.exports = async function cmd (src, dst, options = {}) {
       } else {
         status(formatDiff(diff), { clear: true })
       }
-
-      await new Promise(resolve => setTimeout(resolve, 1000))
     }
 
     if (first) {
