@@ -60,7 +60,8 @@ module.exports = async function cmd (src, options = {}) {
       return
     }
 
-    res.setHeader('Content-Type', mime.lookup(filename))
+    const contentType = mime.lookup(filename)
+    res.setHeader('Content-Type', contentType === false ? 'application/octet-stream' : contentType)
     res.setHeader('Accept-Ranges', 'bytes')
 
     let rs
