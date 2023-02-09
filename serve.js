@@ -9,6 +9,7 @@ const rangeParser = require('range-parser')
 const goodbye = require('graceful-goodbye')
 const graceful = require('graceful-http')
 const crayon = require('tiny-crayon')
+const mime = require('mime-types')
 
 module.exports = async function cmd (src, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -59,7 +60,7 @@ module.exports = async function cmd (src, options = {}) {
       return
     }
 
-    res.setHeader('Content-Type', 'application/octet-stream')
+    res.setHeader('Content-Type', mime.lookup(filename))
     res.setHeader('Accept-Ranges', 'bytes')
 
     let rs
