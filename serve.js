@@ -52,7 +52,8 @@ module.exports = async function cmd (src, options = {}) {
       return
     }
 
-    const filename = decodeURI(req.url)
+    const { pathname } = new URL(req.url, 'http://localhost')
+    const filename = decodeURI(pathname)
     const entry = await drive.entry(filename)
 
     if (!entry || !entry.value.blob) {
