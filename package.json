@@ -29,10 +29,9 @@
     "hyperdrive": "next",
     "hyperswarm": "^4.3.7",
     "localdrive": "^1.4.1",
-    "mime-types": "^2.1.35",
     "mirror-drive": "^1.2.2",
-    "range-parser": "^1.2.1",
     "recursive-watch": "^1.1.4",
+    "serve-drive": "^0.0.1",
     "tiny-byte-size": "^1.1.0",
     "tiny-crayon": "^1.0.5"
   },
