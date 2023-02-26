@@ -1,9 +1,10 @@
 const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
 const HypercoreId = require('hypercore-id-encoding')
-const fsp = require('fs/promises')
 const byteSize = require('tiny-byte-size')
 const crayon = require('tiny-crayon')
+const stat = require('./lib/stat.js')
+const errorAndExit = require('./lib/exit.js')
 
 module.exports = async function cmd (key, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -35,18 +36,4 @@ module.exports = async function cmd (key, options = {}) {
 
 function calculateSize (info) {
   return info.storage.oplog + info.storage.tree + info.storage.blocks + info.storage.bitfield
-}
-
-async function stat (path) {
-  try {
-    return await fsp.stat(path)
-  } catch (error) {
-    if (error.code === 'ENOENT') return null
-    throw error
-  }
-}
-
-function errorAndExit (message) {
-  console.error('Error:', message)
-  process.exit(1)
 }

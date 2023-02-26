@@ -4,6 +4,7 @@ const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
 const crayon = require('tiny-crayon')
+const errorAndExit = require('./lib/exit.js')
 
 module.exports = async function cmd (key, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -37,9 +38,4 @@ module.exports = async function cmd (key, options = {}) {
 
     drive.corestore.replicate(socket)
   }
-}
-
-function errorAndExit (message) {
-  console.error('Error:', message)
-  process.exit(1)
 }

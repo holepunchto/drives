@@ -1,8 +1,9 @@
 const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
 const HypercoreId = require('hypercore-id-encoding')
-const fsp = require('fs/promises')
 const crayon = require('tiny-crayon')
+const stat = require('./lib/stat.js')
+const errorAndExit = require('./lib/exit.js')
 
 module.exports = async function cmd (options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -16,18 +17,4 @@ module.exports = async function cmd (options = {}) {
   await drive.ready()
 
   console.log('New drive:', crayon.magenta(HypercoreId.encode(drive.key)))
-}
-
-async function stat (path) {
-  try {
-    return await fsp.stat(path)
-  } catch (error) {
-    if (error.code === 'ENOENT') return null
-    throw error
-  }
-}
-
-function errorAndExit (message) {
-  console.error('Error:', message)
-  process.exit(1)
 }

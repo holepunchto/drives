@@ -1,15 +1,15 @@
 const path = require('path')
-const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
 const Hyperswarm = require('hyperswarm')
 const HypercoreId = require('hypercore-id-encoding')
-const driveId = require('./lib/drive-id')
 const goodbye = require('graceful-goodbye')
 const debounceify = require('debounceify')
 const recursiveWatch = require('recursive-watch')
 const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
+const errorAndExit = require('./lib/exit.js')
+const getDrive = require('./lib/get-drive.js')
 
 module.exports = async function cmd (src, dst, options = {}) {
   if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
@@ -125,23 +125,6 @@ function getDrivePath (arg, type) {
   errorAndExit('Invalid drive path')
 }
 
-function getDrive (arg, corestore) {
-  const id = driveId(arg)
-
-  if (id.type === 'path') {
-    return new Localdrive(arg)
-  }
-
-  if (id.type === 'key') {
-    // + store should be created outside somehow
-    // + ram option
-    const store = typeof corestore === 'string' ? new Corestore(corestore) : corestore // +
-    return new Hyperdrive(store, HypercoreId.decode(arg))
-  }
-
-  errorAndExit('Invalid drive')
-}
-
 function getDriveType (drive) {
   if (drive instanceof Localdrive) return 'localdrive'
   if (drive instanceof Hyperdrive) return 'hyperdrive'
@@ -196,9 +179,4 @@ function formatCount (count) {
 function status (msg, opts = {}) {
   const clear = '\x1B[2K\x1B[200D'
   process.stdout.write((opts.clear ? clear : '') + msg + (opts.done ? '\n' : ''))
-}
-
-function errorAndExit (message) {
-  console.error('Error:', message)
-  process.exit(1)
 }

@@ -1,14 +1,13 @@
-const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
-const Localdrive = require('localdrive')
 const Hyperswarm = require('hyperswarm')
 const HypercoreId = require('hypercore-id-encoding')
-const driveId = require('./lib/drive-id')
 const http = require('http')
 const goodbye = require('graceful-goodbye')
 const graceful = require('graceful-http')
 const crayon = require('tiny-crayon')
 const serve = require('serve-drive')
+const errorAndExit = require('./lib/exit.js')
+const getDrive = require('./lib/get-drive.js')
 
 module.exports = async function cmd (src, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
@@ -17,7 +16,7 @@ module.exports = async function cmd (src, options = {}) {
   options.port = typeof options.port !== 'undefined' ? Number(options.port) : 7000
   options.host = typeof options.host !== 'undefined' ? options.host : null
 
-  const drive = getDrive(src, options.corestore)
+  const drive = getDrive(src, options.corestore, { localdrive: { followLinks: true } })
 
   goodbye(() => drive.close(), 2)
   await drive.ready()
@@ -63,24 +62,4 @@ module.exports = async function cmd (src, options = {}) {
 function getHost (address) {
   if (address === '::' || address === '0.0.0.0') return 'localhost'
   return address
-}
-
-function getDrive (arg, corestore) {
-  const id = driveId(arg)
-
-  if (id.type === 'path') {
-    return new Localdrive(arg, { followLinks: true })
-  }
-
-  if (id.type === 'key') {
-    const store = new Corestore(corestore)
-    return new Hyperdrive(store, HypercoreId.decode(arg))
-  }
-
-  errorAndExit('Invalid drive')
-}
-
-function errorAndExit (message) {
-  console.error('Error:', message)
-  process.exit(1)
 }
