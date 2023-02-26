@@ -5,10 +5,13 @@ const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
 const crayon = require('tiny-crayon')
 const errorAndExit = require('./lib/exit.js')
+const stat = require('./lib/stat.js')
 
 module.exports = async function cmd (key, options = {}) {
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
   if (!options.corestore) options.corestore = './corestore'
+
+  if (await stat(options.corestore) === null) errorAndExit('--corestore path does not exists')
 
   const swarm = new Hyperswarm()
   const store = new Corestore(options.corestore)
