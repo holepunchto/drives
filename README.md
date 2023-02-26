@@ -16,6 +16,7 @@ Commands:
   seed [options] [key]          Seed a Hyperdrive to the DHT network
   download [options] <key>      Download a Hyperdrive by key
   serve [options] <src>         Creates a HTTP drive server
+  ls [options] <src>            List files of the drive
   info [options] [key]          Show info about the Hyperdrive
 ```
 
@@ -56,6 +57,13 @@ drives serve <key or path>
 ```
 
 URL requests are like `/path/to/file`, i.e. `http://localhost:5000/index.js`.
+
+#### List files
+```bash
+drives ls <key or path>
+```
+
+Note: currently it ignores `.git`, `.github`, `node_modules`, and `corestore` entries.
 
 #### Show storage size, version, etc
 ```bash
