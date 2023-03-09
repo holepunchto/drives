@@ -1,6 +1,6 @@
 # drives
 
-CLI to download, seed, and mirror a Hyperdrive or Localdrive
+CLI to seed, mirror, and serve a Hyperdrive or Localdrive
 
 ```
 npm i -g drives
@@ -14,7 +14,6 @@ Commands:
   touch [options]               Create a writable Hyperdrive
   mirror [options] <src> <dst>  Mirror a drive into another drive
   seed [options] [key]          Seed a Hyperdrive to the DHT network
-  download [options] <key>      Download a Hyperdrive by key
   serve [options] <src>         Creates a HTTP drive server
   ls [options] <src>            List files of the drive
   info [options] [key]          Show info about the Hyperdrive
@@ -46,8 +45,10 @@ drives seed [my-drive-key]
 ```
 
 #### Download a Hyperdrive
+You can reuse the `mirror` command to download a `Hyperdrive` into the `Corestore`.
+
 ```bash
-drives download <my-drive-key>
+drives mirror <my-drive-key>
 ```
 
 #### Serve a drive via HTTP
