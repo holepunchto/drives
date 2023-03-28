@@ -8,6 +8,7 @@ const debounceify = require('debounceify')
 const recursiveWatch = require('recursive-watch')
 const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
+const safetyCatch = require('safety-catch')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
 
@@ -56,8 +57,10 @@ module.exports = async function cmd (src, dst, options = {}) {
   }
 
   if (isDownload) {
-    console.log(crayon.gray('Downloading drive...'))
-    console.log()
+    if (options.verbose) {
+      console.log(crayon.gray('Downloading drive...'))
+      console.log()
+    }
 
     await downloadDrive(source, options)
 
@@ -102,45 +105,17 @@ module.exports = async function cmd (src, dst, options = {}) {
 }
 
 async function downloadDrive (drive, options) {
-  // Sparse download
-  if (!options.live) {
-    await drive.update()
+  // + live mirror download
 
-    const started = Date.now()
-    await drive.download('/') // + difficult to cancel on a CTRL+C scenario, so it throws an error atm
-    console.log('Downloaded in', Date.now() - started, 'ms')
-
-    goodbye.exit()
-
-    return
-  }
-
-  // Non-sparse download
   await drive.update()
 
-  // + double check if listening to 'blobs' event is needed or not on this case
-  if (!drive.blobs) drive.once('blobs', (blobs) => downloadCore(blobs.core, 'blobs'))
-  else downloadCore(drive.blobs.core, 'blobs')
+  // + just check prev vs current version?
 
-  downloadCore(drive.core, 'files') // + swarm.join?
+  const started = Date.now()
+  await drive.download('/').catch(safetyCatch) // + difficult to cancel on a CTRL+C scenario, so it throws an error atm
+  console.log('Downloaded in', Date.now() - started, 'ms')
 
-  function downloadCore (core, name) {
-    onfinish()
-
-    core.download()
-
-    core.on('download', function (index, byteLength, from) {
-      // const remoteInfo = from.stream.rawStream.remoteHost + ':' + from.stream.rawStream.remotePort
-      console.log('Downloaded ' + name + ' block #' + index, '(' + core.contiguousLength + '/' + core.length + ')')
-      onfinish()
-    })
-
-    function onfinish () {
-      if (core.contiguousLength === core.length) {
-        console.log('Download finished for', name)
-      }
-    }
-  }
+  goodbye.exit()
 }
 
 function watch (drive, cb) {

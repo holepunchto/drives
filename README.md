@@ -14,6 +14,7 @@ Commands:
   touch [options]               Create a writable Hyperdrive
   mirror [options] <src> <dst>  Mirror a drive into another drive
   seed [options] [key]          Seed a Hyperdrive to the DHT network
+  download [options] <key>      Archive download a Hyperdrive by key
   serve [options] <src>         Creates a HTTP drive server
   ls [options] <src>            List files of the drive
   info [options] [key]          Show info about the Hyperdrive
@@ -39,16 +40,24 @@ drives mirror <src> <dst>
 
 Use `--live` for real-time mirroring, and `--verbose` to show all logs.
 
+#### Download a Hyperdrive
+You can reuse the `mirror` command to download a `Hyperdrive` into the `Corestore`:
+
+```bash
+drives mirror <my-drive-key>
+```
+
 #### Share a drive
 ```bash
 drives seed [my-drive-key]
 ```
 
-#### Download a Hyperdrive
-You can reuse the `mirror` command to download a `Hyperdrive` into the `Corestore`.
+#### Archive download a Hyperdrive
+
+Continuous `download` with all past historical states, useful to checkout on older versions:
 
 ```bash
-drives mirror <my-drive-key>
+drives download <my-drive-key>
 ```
 
 #### Serve a drive via HTTP

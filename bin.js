@@ -2,6 +2,7 @@
 
 const { Command } = require('commander')
 const touch = require('./touch.js')
+const download = require('./download.js')
 const seed = require('./seed.js')
 const mirror = require('./mirror.js')
 const serve = require('./serve.js')
@@ -35,6 +36,12 @@ program.command('seed')
   .argument('[key]', 'Drive public key')
   .option('--corestore <path>', 'Corestore path')
   .action(seed)
+
+program.command('download')
+  .description('Download a hyperdrive by key')
+  .argument('<key>', 'Drive public key')
+  .option('--corestore <path>', 'Corestore path')
+  .action(download)
 
 program.command('serve')
   .description('Creates a HTTP drive server')
