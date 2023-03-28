@@ -57,10 +57,8 @@ module.exports = async function cmd (src, dst, options = {}) {
   }
 
   if (isDownload) {
-    if (options.verbose) {
-      console.log(crayon.gray('Downloading drive...'))
-      console.log()
-    }
+    console.log(crayon.gray('Downloading drive...'))
+    console.log()
 
     await downloadDrive(source, options)
 
@@ -105,14 +103,21 @@ module.exports = async function cmd (src, dst, options = {}) {
 }
 
 async function downloadDrive (drive, options) {
-  // + live mirror download
+  // + live mirror download?
 
   await drive.update()
 
-  // + just check prev vs current version?
-
   const started = Date.now()
-  await drive.download('/').catch(safetyCatch) // + difficult to cancel on a CTRL+C scenario, so it throws an error atm
+
+  try {
+    await drive.download()
+  } catch (err) {
+    // Normally a request cancelled due CTRL-C
+    safetyCatch(err)
+    goodbye.exit()
+    return
+  }
+
   console.log('Downloaded in', Date.now() - started, 'ms')
 
   goodbye.exit()
