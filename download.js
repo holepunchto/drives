@@ -4,7 +4,6 @@ const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
 const crayon = require('tiny-crayon')
-const safetyCatch = require('safety-catch')
 const errorAndExit = require('./lib/exit.js')
 
 module.exports = async function cmd (key, options = {}) {
@@ -44,7 +43,7 @@ module.exports = async function cmd (key, options = {}) {
 
     core.on('download', function (index, byteLength, from) {
       // const remoteInfo = from.stream.rawStream.remoteHost + ':' + from.stream.rawStream.remotePort
-      console.log('Downloaded ' + name + ' block #' + index, '(' + core.contiguousLength + '/' + core.length + ')', )
+      console.log('Downloaded ' + name + ' block #' + index, '(' + core.contiguousLength + '/' + core.length + ')')
       onfinish()
     })
 
