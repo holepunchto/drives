@@ -8,6 +8,7 @@ const debounceify = require('debounceify')
 const recursiveWatch = require('recursive-watch')
 const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
+const safetyCatch = require('safety-catch')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
 
@@ -19,16 +20,16 @@ module.exports = async function cmd (src, dst, options = {}) {
   if (!options.corestore) options.corestore = './corestore'
 
   const source = getDrive(src, options.corestore)
-  const destination = getDrive(dst, source.corestore ? source.corestore : options.corestore)
+  const destination = dst ? getDrive(dst, source.corestore ? source.corestore : options.corestore) : null
+
+  const isDownload = !destination
+  if (isDownload && !(source instanceof Hyperdrive)) errorAndExit('Source must be a Hyperdrive key for download mode')
 
   goodbye(() => source.close(), 3)
-  goodbye(() => destination.close(), 3)
-
-  const sourceType = getDriveType(source)
-  const destinationType = getDriveType(destination)
+  if (destination) goodbye(() => destination.close(), 3)
 
   await source.ready()
-  await destination.ready()
+  if (destination) await destination.ready()
 
   const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
   if (source instanceof Hyperdrive || (options.live && hyperdrives.length)) {
@@ -44,9 +45,24 @@ module.exports = async function cmd (src, dst, options = {}) {
   }
 
   if (options.verbose) {
+    const sourceType = getDriveType(source)
     console.log(crayon.blue('Source'), crayon.gray('(' + sourceType + ')') + ':', crayon.magenta(getDrivePath(src, sourceType)))
-    console.log(crayon.green('Target'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
+
+    if (destination) {
+      const destinationType = getDriveType(destination)
+      console.log(crayon.green('Target'), crayon.gray('(' + destinationType + ')') + ':', crayon.magenta(getDrivePath(dst, destinationType)))
+    }
+
     console.log()
+  }
+
+  if (isDownload) {
+    console.log(crayon.gray('Downloading drive...'))
+    console.log()
+
+    await downloadDrive(source, options)
+
+    return
   }
 
   let first = true
@@ -84,6 +100,27 @@ module.exports = async function cmd (src, dst, options = {}) {
   await mirror()
 
   if (!options.live) goodbye.exit()
+}
+
+async function downloadDrive (drive, options) {
+  // + live mirror download?
+
+  await drive.update()
+
+  const started = Date.now()
+
+  try {
+    await drive.download()
+  } catch (err) {
+    // Normally a request cancelled due CTRL-C
+    safetyCatch(err)
+    goodbye.exit()
+    return
+  }
+
+  console.log('Downloaded in', Date.now() - started, 'ms')
+
+  goodbye.exit()
 }
 
 function watch (drive, cb) {

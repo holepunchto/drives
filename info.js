@@ -24,8 +24,11 @@ module.exports = async function cmd (key, options = {}) {
 
   console.log('Version:', drive.version)
   console.log('Writable?', drive.db.feed.writable)
+  console.log('Files length:', crayon.yellow(drive.core.contiguousLength) + '/' + crayon.yellow(drive.core.length))
 
   if (drive.blobs) {
+    console.log('Blobs length:', crayon.yellow(drive.blobs.core.contiguousLength) + '/' + crayon.yellow(drive.blobs.core.length))
+
     const dbInfo = await drive.db.feed.info({ storage: true })
     const blobsInfo = await drive.blobs.core.info({ storage: true })
     const total = calculateSize(dbInfo) + calculateSize(blobsInfo)

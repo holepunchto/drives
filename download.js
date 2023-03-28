@@ -3,7 +3,6 @@ const Hyperdrive = require('hyperdrive')
 const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
-// const Seeders = require('@hyperswarm/seeders')
 const crayon = require('tiny-crayon')
 const errorAndExit = require('./lib/exit.js')
 
@@ -19,8 +18,8 @@ module.exports = async function cmd (key, options = {}) {
   goodbye(() => drive.close(), 2)
 
   await drive.ready()
+
   console.log(crayon.gray('Downloading drive...'))
-  console.log('Key:', crayon.magenta(HypercoreId.encode(drive.key)))
   console.log()
 
   swarm.on('connection', onsocket)
@@ -29,24 +28,31 @@ module.exports = async function cmd (key, options = {}) {
   const done = drive.corestore.findingPeers()
   swarm.flush().then(done, done)
 
-  /* const seeders = new Seeders(drive.key, { dht: swarm.dht, maxClientConnections: 8 })
-  goodbye(() => seeders.destroy(), 1)
+  await drive.update()
 
-  if (seeders.owner) throw new Error('Not for owners')
+  // + double check if listening to 'blobs' event is needed or not on this case
+  if (drive.blobs) downloadCore(drive.blobs.core, 'blobs')
+  else drive.once('blobs', (blobs) => downloadCore(blobs.core, 'blobs'))
 
-  seeders.on('connection', onsocket)
-  const done2 = drive.corestore.findingPeers()
-  seeders.join().then(done2, done2) */
+  downloadCore(drive.core, 'files') // + swarm.join?
 
-  await drive.update() // This is needed so drive.download('/') doesn't get stuck on first run
+  function downloadCore (core, name) {
+    onfinish()
 
-  // + just check prev vs current version?
+    core.download({ linear: true })
 
-  const started = Date.now()
-  await drive.download('/')
-  console.log('Downloaded in', Date.now() - started, 'ms')
+    core.on('download', function (index, byteLength, from) {
+      // const remoteInfo = from.stream.rawStream.remoteHost + ':' + from.stream.rawStream.remotePort
+      console.log('Downloaded ' + name + ' block #' + index, '(' + core.contiguousLength + '/' + core.length + ')')
+      onfinish()
+    })
 
-  goodbye.exit()
+    function onfinish () {
+      if (core.contiguousLength === core.length) {
+        console.log('Download finished for', name)
+      }
+    }
+  }
 
   function onsocket (socket) {
     const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort

@@ -12,7 +12,7 @@ const info = require('./info.js')
 const program = new Command()
 
 program
-  .description('CLI to download, seed, and mirror a Hyperdrive or Localdrive')
+  .description('CLI to seed, mirror, and serve a Hyperdrive or Localdrive')
 
 program.command('touch')
   .description('Create a writable hyperdrive')
@@ -22,7 +22,7 @@ program.command('touch')
 program.command('mirror')
   .description('Mirror a drive into another drive')
   .argument('<src>', 'Source drive (key or path)')
-  .argument('<dst>', 'Destination drive (key or path)')
+  .argument('[dst]', 'Destination drive (key or path)')
   .option('--live', 'Enables real-time sharing')
   .option('--prefix <path>', 'Prefix entries path')
   .option('--filter [ignore...]', 'Ignore entries')
