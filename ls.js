@@ -24,41 +24,41 @@ module.exports = async function cmd (src, options = {}) {
 
   const prefix = options.prefix || '/'
 
-  for await (const entry of drive.list(prefix)) {
-    // + temp until localdrive readdir is added
-    if (entry.key.indexOf('/.git/') > -1) continue
-    if (entry.key.indexOf('/.github/') > -1) continue
-    if (entry.key.indexOf('/node_modules/') > -1) continue
-    if (entry.key.indexOf('/corestore/') > -1) continue
-
-    console.log(await formatEntry(drive, entry))
+  for await (const name of drive.readdir(prefix)) {
+    const key = require('path').join(prefix, name)
+    const entry = await drive.entry(key)
+    console.log(await formatEntry(drive, entry, name))
   }
 }
 
-async function formatEntry (drive, entry) {
+async function formatEntry (drive, entry, name) {
   const color = await getEntryColor(drive, entry)
 
-  if (entry.value.linkname) {
+  if (entry && entry.value.linkname) {
     const linkname = await drive.entry(entry.value.linkname)
     const linknameColor = linkname ? (await getEntryColor(drive, linkname)) : 'red'
 
-    const from = crayon.bold(entry.key)
+    const from = crayon.bold(name)
     const to = isBold(linkname) ? crayon.bold(entry.value.linkname) : entry.value.linkname
 
     return applyLinkColor(from, color) + ' -> ' + applyLinkColor(to, linknameColor)
   }
 
-  if (entry.value.blob) {
+  if (entry && entry.value.blob) {
     const size = byteSize(entry.value.blob.byteLength)
-    const name = isBold(entry) ? crayon.bold(entry.key) : entry.key
+    const key = isBold(entry) ? crayon.bold(name) : name
 
-    return crayon[color](name) + ' ' + crayon.gray('(' + size + ')')
+    return crayon[color](key) + ' ' + crayon.gray('(' + size + ')')
   }
 
-  return crayon[color](entry.key) // +
+  return crayon[color](crayon.bold(name))
 }
 
 async function getEntryColor (drive, entry) {
+  if (!entry) {
+    return 'blue'
+  }
+
   if (entry.value.linkname) {
     const linkname = await drive.entry(entry.value.linkname)
     return linkname ? 'cyan' : 'red'
