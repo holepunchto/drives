@@ -2,7 +2,6 @@ const path = require('path')
 const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
 const Hyperswarm = require('hyperswarm')
-const HypercoreId = require('hypercore-id-encoding')
 const goodbye = require('graceful-goodbye')
 const debounceify = require('debounceify')
 const recursiveWatch = require('recursive-watch')
@@ -11,6 +10,7 @@ const byteSize = require('tiny-byte-size')
 const safetyCatch = require('safety-catch')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
+const swarming = require('./lib/swarming.js')
 
 module.exports = async function cmd (src, dst, options = {}) {
   if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
@@ -134,26 +134,6 @@ function watch (drive, cb) {
   }
 
   errorAndExit('Invalid drive')
-}
-
-function swarming (swarm, drive, options) {
-  swarm.on('connection', onsocket)
-  swarm.join(drive.discoveryKey) // + server/client depends on src vs dst?
-
-  function onsocket (socket) {
-    const remoteInfo = socket.rawStream.remoteHost + ':' + socket.rawStream.remotePort
-    const pk = HypercoreId.encode(socket.remotePublicKey)
-
-    if (options.verbose) {
-      console.log(crayon.cyan('(Swarm)'), 'Peer opened (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk))
-      socket.on('close', () => console.log(crayon.cyan('(Swarm)'), 'Peer closed (' + swarm.connections.size + ')', crayon.gray(remoteInfo), crayon.magenta(pk)))
-    }
-
-    drive.corestore.replicate(socket)
-  }
-
-  const done = drive.corestore.findingPeers()
-  swarm.flush().then(done, done)
 }
 
 function getDrivePath (arg, type) {

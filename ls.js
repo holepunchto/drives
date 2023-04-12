@@ -1,10 +1,13 @@
-const driveId = require('./lib/drive-id')
+const Hyperswarm = require('hyperswarm')
+const Hyperdrive = require('hyperdrive')
 const goodbye = require('graceful-goodbye')
 const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
+const driveId = require('./lib/drive-id')
 const stat = require('./lib/stat.js')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
+const swarming = require('./lib/swarming.js')
 
 module.exports = async function cmd (src, options = {}) {
   if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
@@ -22,6 +25,13 @@ module.exports = async function cmd (src, options = {}) {
   goodbye(() => drive.close())
   await drive.ready()
 
+  if (drive instanceof Hyperdrive) {
+    const swarm = new Hyperswarm()
+    goodbye(() => swarm.destroy(), 1)
+
+    swarming(swarm, drive, options)
+  }
+
   const prefix = options.prefix || '/'
 
   for await (const name of drive.readdir(prefix)) {
@@ -29,6 +39,8 @@ module.exports = async function cmd (src, options = {}) {
     const entry = await drive.entry(key)
     console.log(await formatEntry(drive, entry, name))
   }
+
+  goodbye.exit()
 }
 
 async function formatEntry (drive, entry, name) {
