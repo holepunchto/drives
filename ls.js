@@ -33,7 +33,7 @@ module.exports = async function cmd (src, options = {}) {
       console.log(await formatEntry(drive, entry, name))
     }
   } catch (err) {
-    // Ignore error related to CTRL-C: random-access-storage, and Hypercore session
+    // Ignore errors related to CTRL-C: random-access-storage, and Hypercore session
     if (!(err.message === 'Closed' || err.code === 'SESSION_CLOSED')) throw err
   }
 
