@@ -3,7 +3,6 @@ const Hyperdrive = require('hyperdrive')
 const goodbye = require('graceful-goodbye')
 const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
-const driveId = require('./lib/drive-id')
 const stat = require('./lib/stat.js')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
@@ -13,12 +12,6 @@ module.exports = async function cmd (src, options = {}) {
   if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
   if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> must be a string')
   if (!options.corestore) options.corestore = './corestore'
-
-  const id = driveId(src)
-
-  if (id.type === 'key') {
-    if (await stat(options.corestore) === null) errorAndExit('--corestore path does not exists')
-  }
 
   const drive = getDrive(src, options.corestore)
 
