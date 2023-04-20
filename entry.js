@@ -39,7 +39,7 @@ module.exports = async function cmd (src, filename, options = {}) {
     if (entry.value.linkname) console.log('Linkname:', crayon.cyan(entry.value.linkname))
     else console.log(crayon.gray('Linkname: null'))
 
-    if (entry.value.blob) console.log('Blob length:', crayon.yellow(entry.value.blob.byteLength))
+    if (entry.value.blob) console.log('Blob size:', crayon.yellow(byteSize(entry.value.blob.byteLength)))
     else console.log(crayon.gray('Blob: null'))
 
     if (entry.value.metadata) console.log('Metadata:', entry.value.metadata)
