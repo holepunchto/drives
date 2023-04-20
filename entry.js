@@ -51,7 +51,7 @@ module.exports = async function cmd (src, filename, options = {}) {
     }
 
     // Ignore errors related to CTRL-C: random-access-storage, and Hypercore session
-    if (!(err.message === 'Closed' || err.code === 'SESSION_CLOSED')) throw err
+    if (!(err.message === 'Closed' || err.code === 'SESSION_CLOSED' || err.code === 'REQUEST_CANCELLED')) throw err
   } finally {
     goodbye.exit()
   }
