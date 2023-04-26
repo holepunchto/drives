@@ -8,15 +8,18 @@ const crayon = require('tiny-crayon')
 const ServeDrive = require('serve-drive')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
+const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
 
 module.exports = async function cmd (src, options = {}) {
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
-  if (!options.corestore) options.corestore = './corestore'
+  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')
+
+  const storage = await findCorestore(options)
+  await noticeStorage(storage, [src])
 
   options.port = typeof options.port !== 'undefined' ? Number(options.port) : 7000
   options.host = typeof options.host !== 'undefined' ? options.host : null
 
-  const drive = getDrive(src, options.corestore, { localdrive: { followLinks: true } })
+  const drive = getDrive(src, storage, { localdrive: { followLinks: true } })
 
   goodbye(() => drive.close(), 2)
   await drive.ready()
@@ -52,7 +55,11 @@ module.exports = async function cmd (src, options = {}) {
     host: options.host,
     anyPort: !options.disableAnyPort,
     server,
-    filter: (id, filename) => !filename.toLowerCase().startsWith('/corestore/')
+    filter: (id, filename) => {
+      // TODO: remove "corestore" at some point
+      filename = filename.toLowerCase()
+      return !(filename.startsWith('/.drives/') || filename.startsWith('/corestore/'))
+    }
   })
 
   serve.add(drive, { default: true })

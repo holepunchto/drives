@@ -3,21 +3,18 @@ const Hyperdrive = require('hyperdrive')
 const HypercoreId = require('hypercore-id-encoding')
 const byteSize = require('tiny-byte-size')
 const crayon = require('tiny-crayon')
-const stat = require('./lib/stat.js')
 const errorAndExit = require('./lib/exit.js')
+const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
 
 module.exports = async function cmd (key, options = {}) {
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> is required as string')
-  if (!options.corestore) options.corestore = './corestore'
+  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')
 
-  if (await stat(options.corestore) === null) errorAndExit('--corestore path does not exists')
+  const storage = await findCorestore(options)
+  await noticeStorage(storage)
 
-  const store = new Corestore(options.corestore)
+  const store = new Corestore(storage)
   const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
   await drive.ready()
-
-  console.log(crayon.gray('Loading drive info...'))
-  console.log()
 
   console.log('Key:', crayon.magenta(HypercoreId.encode(drive.key)))
   if (drive.contentKey) console.log('Content key:', crayon.magenta(HypercoreId.encode(drive.contentKey)))

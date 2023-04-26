@@ -5,22 +5,22 @@ const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
 const crayon = require('tiny-crayon')
 const errorAndExit = require('./lib/exit.js')
+const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
 
 module.exports = async function cmd (key, options = {}) {
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> must be a string')
-  if (!options.corestore) options.corestore = './corestore'
+  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> must be a string')
+
+  const storage = await findCorestore(options)
+  await noticeStorage(storage)
 
   const swarm = new Hyperswarm()
-  const store = new Corestore(options.corestore)
+  const store = new Corestore(storage)
   const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
 
   goodbye(() => swarm.destroy(), 1)
   goodbye(() => drive.close(), 2)
 
   await drive.ready()
-
-  console.log(crayon.gray('Downloading drive...'))
-  console.log()
 
   swarm.on('connection', onsocket)
   swarm.join(drive.discoveryKey, { server: false, client: true })

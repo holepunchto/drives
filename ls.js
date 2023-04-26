@@ -1,18 +1,23 @@
 const Hyperswarm = require('hyperswarm')
 const Hyperdrive = require('hyperdrive')
+const unixResolve = require('unix-path-resolve')
 const goodbye = require('graceful-goodbye')
 const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
 const swarming = require('./lib/swarming.js')
+const generateFilter = require('./lib/generate-filter.js')
+const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
 
 module.exports = async function cmd (src, options = {}) {
   if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> must be a string')
-  if (!options.corestore) options.corestore = './corestore'
+  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> must be a string')
 
-  const drive = getDrive(src, options.corestore)
+  const storage = await findCorestore(options)
+  await noticeStorage(storage, [src])
+
+  const drive = getDrive(src, storage)
 
   goodbye(() => drive.close())
   await drive.ready()
@@ -24,20 +29,25 @@ module.exports = async function cmd (src, options = {}) {
     swarming(swarm, drive, options)
   }
 
-  const prefix = options.prefix || '/'
+  const prefix = unixResolve('/', options.prefix)
+  const filter = generateFilter()
 
   try {
+    if (!filter(prefix)) return
+
     for await (const name of drive.readdir(prefix)) {
-      const key = require('path').join(prefix, name)
+      const key = unixResolve(prefix, name)
+      if (!filter(key)) continue
+
       const entry = await drive.entry(key)
       console.log(await formatEntry(drive, entry, name))
     }
   } catch (err) {
     // Ignore errors related to CTRL-C: random-access-storage, and Hypercore session
     if (!(err.message === 'Closed' || err.code === 'SESSION_CLOSED' || err.code === 'REQUEST_CANCELLED')) throw err
+  } finally {
+    goodbye.exit()
   }
-
-  goodbye.exit()
 }
 
 async function formatEntry (drive, entry, name) {

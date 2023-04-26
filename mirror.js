@@ -11,16 +11,19 @@ const safetyCatch = require('safety-catch')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
 const swarming = require('./lib/swarming.js')
+const generateFilter = require('./lib/generate-filter.js')
+const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
 
 module.exports = async function cmd (src, dst, options = {}) {
   if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
-  if (options.corestore && typeof options.corestore !== 'string') errorAndExit('--corestore <path> must be a string')
+  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> must be a string')
   if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] must be an array')
 
-  if (!options.corestore) options.corestore = './corestore'
+  const storage = await findCorestore(options)
+  await noticeStorage(storage, [src, dst])
 
-  const source = getDrive(src, options.corestore)
-  const destination = dst ? getDrive(dst, source.corestore ? source.corestore : options.corestore) : null
+  const source = getDrive(src, storage)
+  const destination = dst ? getDrive(dst, source.corestore ? source.corestore : storage) : null
 
   const isDownload = !destination
   if (isDownload && !(source instanceof Hyperdrive)) errorAndExit('Source must be a Hyperdrive key for download mode')
@@ -37,11 +40,6 @@ module.exports = async function cmd (src, dst, options = {}) {
     goodbye(() => swarm.destroy(), 2)
 
     for (const drive of hyperdrives) swarming(swarm, drive, options)
-
-    if (options.verbose) {
-      console.log(crayon.gray('Swarming drives...'))
-      console.log()
-    }
   }
 
   if (options.verbose) {
@@ -146,20 +144,6 @@ function getDriveType (drive) {
   if (drive instanceof Localdrive) return 'localdrive'
   if (drive instanceof Hyperdrive) return 'hyperdrive'
   errorAndExit('Invalid drive')
-}
-
-// + option to disable default filter?
-function generateFilter (custom) {
-  const ignore = ['.git', '.github', 'package-lock.json', 'node_modules/.package-lock.json', 'corestore']
-  if (custom) ignore.push(...custom)
-
-  const str = ignore.map(key => key.replace(/[/.\\\s]/g, '\\$&'))
-  const expr = '\\/(' + str.join('|') + ')(\\/|$)'
-  const regex = new RegExp(expr)
-
-  return function filter (key) {
-    return regex.test(key) === false
-  }
 }
 
 function formatDiff (diff) {

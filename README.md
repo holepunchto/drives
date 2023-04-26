@@ -23,7 +23,15 @@ Commands:
 ## API
 Use `drives --help` for more information, `drives mirror --help`, etc.
 
-You can always add `--corestore [path]`, by default it's `./corestore`.
+#### Storage
+
+By default, it tries to use `.drives` from the current directory.
+
+If it doesn't exists then it will go back `../` until it finds an existing `.drives`.
+
+If it doesn't find anything, then it will create and use a global folder at `~/.drives`.
+
+You can always set `--storage [path]` to force a different location.
 
 #### Create a writable Hyperdrive
 ```bash
@@ -41,11 +49,13 @@ drives mirror <src> <dst>
 Use `--live` for real-time mirroring, and `--verbose` to show all logs.
 
 #### Download a Hyperdrive
-You can reuse the `mirror` command to download a `Hyperdrive` into the `Corestore`:
+You can reuse the `mirror` command to download a `Hyperdrive` into the Corestore:
 
 ```bash
 drives mirror <my-drive-key>
 ```
+
+Note: it ignores `.drives`, `.git`, `.github`, `package-lock.json`, and `corestore` entries.
 
 #### Share a drive
 ```bash
@@ -68,14 +78,12 @@ drives serve <key or path>
 
 URL requests are like `/path/to/file`, i.e. `http://localhost:5000/index.js`.
 
-Only requests to `/corestore/*` are rejected for security, so mind the Corestore location.
+For security, requests to `/.drives/*` are rejected, so mind the storage location!
 
 #### List files
 ```bash
 drives ls <key or path>
 ```
-
-Note: currently it ignores `.git`, `.github`, `node_modules`, and `corestore` entries.
 
 #### Show storage size, version, etc
 ```bash
