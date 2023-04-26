@@ -34,7 +34,8 @@
     "safety-catch": "^1.0.2",
     "serve-drive": "^2.2.0",
     "tiny-byte-size": "^1.1.0",
-    "tiny-crayon": "^1.0.5"
+    "tiny-crayon": "^1.0.5",
+    "unix-path-resolve": "^1.0.2"
   },
   "devDependencies": {
     "standard": "^17.0.0"
