@@ -5,7 +5,7 @@ const http = require('http')
 const goodbye = require('graceful-goodbye')
 const graceful = require('graceful-http')
 const crayon = require('tiny-crayon')
-const serve = require('serve-drive')
+const ServeDrive = require('serve-drive')
 const errorAndExit = require('./lib/exit.js')
 const getDrive = require('./lib/get-drive.js')
 
@@ -47,12 +47,15 @@ module.exports = async function cmd (src, options = {}) {
   const server = http.createServer()
   const close = graceful(server)
 
-  await serve(drive, {
+  const serve = new ServeDrive({
     port: options.port,
     host: options.host,
     anyPort: !options.disableAnyPort,
     server
   })
+
+  serve.add(drive, { default: true })
+  await serve.ready()
 
   goodbye(() => close(), 1)
 
