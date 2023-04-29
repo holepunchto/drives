@@ -32,7 +32,7 @@
     "mirror-drive": "^1.2.2",
     "recursive-watch": "^1.1.4",
     "safety-catch": "^1.0.2",
-    "serve-drive": "^1.0.0",
+    "serve-drive": "^2.2.0",
     "tiny-byte-size": "^1.1.0",
     "tiny-crayon": "^1.0.5"
   },
