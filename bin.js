@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const { Command } = require('commander')
+const init = require('./init.js')
 const touch = require('./touch.js')
 const download = require('./download.js')
 const seed = require('./seed.js')
@@ -14,6 +15,10 @@ const program = new Command()
 
 program
   .description('CLI to seed, mirror, and serve a Hyperdrive or Localdrive')
+
+program.command('init')
+  .description('Initializes a new storage on the cwd')
+  .action(init)
 
 program.command('touch')
   .description('Create a writable hyperdrive')
