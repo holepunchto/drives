@@ -29,6 +29,7 @@
     "hyperdrive": "next",
     "hyperswarm": "^4.3.7",
     "localdrive": "^1.4.1",
+    "minimatch": "^9.0.0",
     "mirror-drive": "^1.2.2",
     "recursive-watch": "^1.1.4",
     "safety-catch": "^1.0.2",
