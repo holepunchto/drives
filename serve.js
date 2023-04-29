@@ -51,7 +51,8 @@ module.exports = async function cmd (src, options = {}) {
     port: options.port,
     host: options.host,
     anyPort: !options.disableAnyPort,
-    server
+    server,
+    filter: (id, filename) => !filename.toLowerCase().startsWith('/corestore/')
   })
 
   serve.add(drive, { default: true })

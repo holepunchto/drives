@@ -68,6 +68,8 @@ drives serve <key or path>
 
 URL requests are like `/path/to/file`, i.e. `http://localhost:5000/index.js`.
 
+Only requests to `/corestore/*` are rejected for security, so mind the Corestore location.
+
 #### List files
 ```bash
 drives ls <key or path>
