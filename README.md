@@ -11,6 +11,7 @@ npm i -g drives
 Usage: drives [options] [command]
 
 Commands:
+  init                          Initializes a new storage on the cwd
   touch [options]               Create a writable Hyperdrive
   mirror [options] <src> <dst>  Mirror a drive into another drive
   seed [options] [key]          Seed a Hyperdrive to the DHT network
@@ -32,6 +33,16 @@ If it doesn't exists then it will go back `../` until it finds an existing `.dri
 If it doesn't find anything, then it will create and use a global folder at `~/.drives`.
 
 You can always set `--storage [path]` to force a different location.
+
+#### Initialize
+It creates the `.drives` storage folder in the current working directory.
+
+```bash
+drives init
+# Notice: new storage at /home/user/Desktop/my-project/.drives/corestore
+```
+
+Useful to avoid doing a parent lookup, and not using the home folder.
 
 #### Create a writable Hyperdrive
 ```bash
