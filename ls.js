@@ -10,9 +10,10 @@ const swarming = require('./lib/swarming.js')
 const generateFilter = require('./lib/generate-filter.js')
 const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
 
-module.exports = async function cmd (src, options = {}) {
+module.exports = async function cmd (src, prefix, options = {}) {
   if (options.prefix && typeof options.prefix !== 'string') errorAndExit('--prefix <path> must be a string')
   if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> must be a string')
+  if (prefix && options.prefix) errorAndExit('Can not use prefix argument with --prefix option')
 
   const storage = await findCorestore(options)
   await noticeStorage(storage, [src])
@@ -29,7 +30,7 @@ module.exports = async function cmd (src, options = {}) {
     swarming(swarm, drive, options)
   }
 
-  const prefix = unixResolve('/', options.prefix)
+  prefix = unixResolve('/', prefix || options.prefix)
   const filter = generateFilter()
 
   try {
