@@ -14,10 +14,10 @@ Commands:
   init                          Initializes a new storage on the cwd
   touch [options]               Create a writable Hyperdrive
   mirror [options] <src> <dst>  Mirror a drive into another drive
+  ls [options] <src>            List files of the drive
   seed [options] [key]          Seed a Hyperdrive to the DHT network
   download [options] <key>      Archive download a Hyperdrive by key
   serve [options] <src>         Creates a HTTP drive server
-  ls [options] <src>            List files of the drive
   info [options] [key]          Show info about the Hyperdrive
 ```
 
@@ -68,6 +68,11 @@ drives mirror <my-drive-key>
 
 Note: it ignores `.drives`, `.git`, `.github`, `package-lock.json`, and `corestore` entries.
 
+#### List files
+```bash
+drives ls <key or path>
+```
+
 #### Share a drive
 ```bash
 drives seed [my-drive-key]
@@ -90,11 +95,6 @@ drives serve <key or path>
 URL requests are like `/path/to/file`, i.e. `http://localhost:5000/index.js`.
 
 For security, requests to `/.drives/*` are rejected, so mind the storage location!
-
-#### List files
-```bash
-drives ls <key or path>
-```
 
 #### Show storage size, version, etc
 ```bash
