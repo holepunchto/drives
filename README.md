@@ -8,19 +8,18 @@ npm i -g drives
 
 ## Usage
 ```bash
-Usage: drives [options] [command]
+Usage: drives [command] [options]
 
 Commands:
-  init                          Initializes a new storage on the cwd
-  touch [options]               Create a writable Hyperdrive
-  mirror [options] <src> [dst]  Mirror a drive into another drive
-  ls [options] <src> [path]     List files of the drive
-  seed [options] [key]          Seed a Hyperdrive to the DHT network
-  download [options] <key>      Archive download a Hyperdrive by key
-  serve [options] <src>         Creates a HTTP drive server
-  entry [options] <src> <path>  Show a single entry file
-  info [options] [key]          Show info about the Hyperdrive
-  help [command]                display help for command
+  init                Initializes a new storage on the cwd
+  touch               Create a writable Hyperdrive
+  mirror <src> [dst]  Mirror a drive into another drive
+  ls <src> [path]     List files of the drive
+  seed [key]          Seed a Hyperdrive to the DHT network
+  download <key>      Archive download a Hyperdrive by key
+  serve <src>         Creates a HTTP drive server
+  entry <src> <path>  Show a single entry file
+  info [key]          Show info about the Hyperdrive
 ```
 
 ## API
