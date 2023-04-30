@@ -13,12 +13,14 @@ Usage: drives [options] [command]
 Commands:
   init                          Initializes a new storage on the cwd
   touch [options]               Create a writable Hyperdrive
-  mirror [options] <src> <dst>  Mirror a drive into another drive
-  ls [options] <src>            List files of the drive
+  mirror [options] <src> [dst]  Mirror a drive into another drive
+  ls [options] <src> [path]     List files of the drive
   seed [options] [key]          Seed a Hyperdrive to the DHT network
   download [options] <key>      Archive download a Hyperdrive by key
   serve [options] <src>         Creates a HTTP drive server
+  entry [options] <src> <path>  Show a single entry file
   info [options] [key]          Show info about the Hyperdrive
+  help [command]                display help for command
 ```
 
 ## API
@@ -58,6 +60,8 @@ drives mirror <src> <dst>
 ```
 
 Use `--live` for real-time mirroring, and `--verbose` to show all logs.
+
+Use `--dry-run` to disable writing, and remember there is `--help` for more.
 
 #### Download a Hyperdrive
 You can reuse the `mirror` command to download a `Hyperdrive` into the Corestore:
