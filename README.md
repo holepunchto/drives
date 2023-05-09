@@ -11,15 +11,17 @@ npm i -g drives
 Usage: drives [command] [options]
 
 Commands:
-  init                Initializes a new storage on the cwd
-  touch               Create a writable Hyperdrive
-  mirror <src> [dst]  Mirror a drive into another drive
-  ls <src> [path]     List files of the drive
-  seed [key]          Seed a Hyperdrive to the DHT network
-  download <key>      Archive download a Hyperdrive by key
-  serve <src>         Creates a HTTP drive server
-  entry <src> <path>  Show a single entry file
-  info [key]          Show info about the Hyperdrive
+  init                     Initializes a new storage on the cwd
+  touch                    Create a writable Hyperdrive
+  mirror <src> [dst]       Mirror a drive into another drive
+  ls <src> [path]          List files of the drive
+  seed [key]               Share a Hyperdrive
+  download <key>           Archive download a Hyperdrive by key
+  serve <src>              Creates a HTTP drive server
+  put <src> <path> <blob>  Create a file
+  entry <src> <path>       Show a single entry file
+  get <src> <path>         Show the file content
+  info [key]               Show info about the Hyperdrive
 ```
 
 ## API
