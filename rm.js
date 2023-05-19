@@ -25,9 +25,11 @@ module.exports = async function cmd (src, filename, options = {}) {
     if (!filter(filename)) return
 
     if (options.recursive) {
+      const batch = drive.batch()
       for await (const entry of drive.list(filename)) {
-        await drive.del(entry.key)
+        await batch.del(entry.key)
       }
+      await batch.flush()
     } else {
       await drive.del(filename)
     }
