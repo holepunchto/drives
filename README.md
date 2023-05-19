@@ -21,6 +21,7 @@ Commands:
   put <src> <path> <blob>  Create a file
   entry <src> <path>       Show a single entry file
   get <src> <path>         Show the file content
+  rm <src> <path>          Delete a file
   info [key]               Show info about the Hyperdrive
 ```
 
