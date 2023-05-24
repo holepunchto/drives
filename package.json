@@ -26,7 +26,7 @@
     "graceful-goodbye": "^1.2.0",
     "graceful-http": "^1.0.0",
     "hypercore-id-encoding": "^1.0.2",
-    "hyperdrive": "next",
+    "hyperdrive": "^11.0.1",
     "hyperswarm": "^4.3.7",
     "localdrive": "^1.4.1",
     "minimatch": "^9.0.0",
