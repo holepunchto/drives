@@ -108,4 +108,5 @@ drives info [my-drive-key]
 ```
 
 ## License
-MIT
+
+Apache-2.0

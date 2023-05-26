@@ -13,8 +13,8 @@
     "type": "git",
     "url": "https://github.com/holepunchto/drives.git"
   },
-  "author": "Lucas Barrena (LuKks)",
-  "license": "MIT",
+  "author": "Holepunch",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/holepunchto/drives/issues"
   },
