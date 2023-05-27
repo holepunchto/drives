@@ -12,8 +12,9 @@ module.exports = async function cmd (key, options = {}) {
   const storage = await findCorestore(options)
   await noticeStorage(storage)
 
+  // TODO: Corestore needs a method like store.exists(key) to avoid creating the drive unnecessarily
   const store = new Corestore(storage)
-  const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
+  const drive = new Hyperdrive(store, HypercoreId.decode(key))
   await drive.ready()
 
   console.log('Key:', crayon.magenta(HypercoreId.encode(drive.key)))
