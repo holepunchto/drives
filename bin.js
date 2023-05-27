@@ -13,6 +13,7 @@ const entry = require('./entry.js')
 const get = require('./get.js')
 const rm = require('./rm.js')
 const info = require('./info.js')
+const purge = require('./purge.js')
 
 const program = new Command()
 
@@ -105,5 +106,11 @@ program.command('info')
   .argument('[key]', 'Drive public key')
   .option('--storage <path>', 'Storage path')
   .action(info)
+
+program.command('purge')
+  .description('Delete all local storage of the drive')
+  .argument('<key>', 'Drive public key')
+  .option('--storage <path>', 'Storage path')
+  .action(purge)
 
 program.parseAsync()
