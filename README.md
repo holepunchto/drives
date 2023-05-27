@@ -23,6 +23,7 @@ Commands:
   get <src> <path>         Show the file content
   rm <src> <path>          Delete a file
   info [key]               Show info about the Hyperdrive
+  purge <key>              Delete all local storage of the drive
 ```
 
 ## API
