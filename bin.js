@@ -103,7 +103,7 @@ program.command('rm')
 
 program.command('info')
   .description('Show info about the Hyperdrive')
-  .argument('[key]', 'Drive public key')
+  .argument('<key>', 'Drive public key')
   .option('--storage <path>', 'Storage path')
   .action(info)
 

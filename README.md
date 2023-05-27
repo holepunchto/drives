@@ -22,7 +22,7 @@ Commands:
   entry <src> <path>       Show a single entry file
   get <src> <path>         Show the file content
   rm <src> <path>          Delete a file
-  info [key]               Show info about the Hyperdrive
+  info <key>               Show info about the Hyperdrive
   purge <key>              Delete all local storage of the drive
 ```
 
@@ -105,7 +105,7 @@ For security, requests to `/.drives/*` are rejected, so mind the storage locatio
 
 #### Show storage size, version, etc
 ```bash
-drives info [my-drive-key]
+drives info <my-drive-key>
 ```
 
 ## License
