@@ -4,8 +4,8 @@ const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
 const crayon = require('tiny-crayon')
-const errorAndExit = require('./lib/exit.js')
-const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
+const errorAndExit = require('../lib/exit.js')
+const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
 
 module.exports = async function cmd (key, options = {}) {
   if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')

@@ -6,9 +6,9 @@ const goodbye = require('graceful-goodbye')
 const graceful = require('graceful-http')
 const crayon = require('tiny-crayon')
 const ServeDrive = require('serve-drive')
-const errorAndExit = require('./lib/exit.js')
-const getDrive = require('./lib/get-drive.js')
-const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
+const errorAndExit = require('../lib/exit.js')
+const getDrive = require('../lib/get-drive.js')
+const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
 
 module.exports = async function cmd (src, options = {}) {
   if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')
