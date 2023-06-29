@@ -26,6 +26,7 @@ program.command('init')
 
 program.command('touch')
   .description('Create a writable Hyperdrive')
+  .option('--use-cwd', 'Use cwd as the namespace')
   .option('--storage <path>', 'Storage path')
   .action(touch)
 

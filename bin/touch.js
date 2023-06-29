@@ -1,4 +1,5 @@
 const Corestore = require('corestore')
+const path = require('path')
 const Hyperdrive = require('hyperdrive')
 const HypercoreId = require('hypercore-id-encoding')
 const crayon = require('tiny-crayon')
@@ -12,7 +13,8 @@ module.exports = async function cmd (options = {}) {
   await noticeStorage(storage)
 
   const store = new Corestore(storage)
-  const ns = store.namespace(process.hrtime.bigint().toString())
+  const name = options.useCwd ? path.resolve('.') : process.hrtime.bigint().toString()
+  const ns = store.namespace(name)
   const drive = new Hyperdrive(ns)
   await drive.ready()
 
