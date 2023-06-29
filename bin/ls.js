@@ -36,12 +36,14 @@ module.exports = async function cmd (src, prefix, options = {}) {
   try {
     if (!filter(prefix)) return
 
-    for await (const name of drive.readdir(prefix)) {
-      const key = unixResolve(prefix, name)
+    const iterator = options.R ? drive.list(prefix) : drive.readdir(prefix)
+
+    for await (const name of iterator) {
+      const key = unixResolve(prefix, options.R ? name.key : name)
       if (!filter(key)) continue
 
       const entry = await drive.entry(key)
-      console.log(await formatEntry(drive, entry, name))
+      console.log(await formatEntry(drive, entry, options.R ? name.key : name))
     }
   } catch (err) {
     // Ignore errors related to CTRL-C: random-access-storage, and Hypercore session
