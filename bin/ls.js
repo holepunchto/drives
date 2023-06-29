@@ -57,7 +57,7 @@ async function formatEntry (drive, entry, name) {
   const color = await getEntryColor(drive, entry)
 
   if (entry && entry.value.linkname) {
-    const linkname = await drive.entry(entry.value.linkname)
+    const linkname = await drive.entry(unixResolve(entry.key, entry.value.linkname))
     const linknameColor = linkname ? (await getEntryColor(drive, linkname)) : 'red'
 
     const from = crayon.bold(name)
