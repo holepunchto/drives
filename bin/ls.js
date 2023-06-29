@@ -82,7 +82,7 @@ async function getEntryColor (drive, entry) {
   }
 
   if (entry.value.linkname) {
-    const linkname = await drive.entry(entry.value.linkname)
+    const linkname = await drive.entry(unixResolve(entry.key, entry.value.linkname))
     return linkname ? 'cyan' : 'red'
   }
 
