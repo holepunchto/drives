@@ -22,7 +22,7 @@ module.exports = async function cmd (src, dst, options = {}) {
   const storage = await findCorestore(options)
   await noticeStorage(storage, [src, dst])
 
-  const source = getDrive(src, storage)
+  let source = getDrive(src, storage)
   const destination = dst ? getDrive(dst, source.corestore ? source.corestore : storage) : null
 
   const isDownload = !destination
@@ -33,6 +33,16 @@ module.exports = async function cmd (src, dst, options = {}) {
 
   await source.ready()
   if (destination) await destination.ready()
+
+  if (options.version) {
+    const version = parseInt(options.version, 10)
+    if (!version) errorAndExit('Invalid --version value')
+
+    const checkout = source.checkout(version)
+    goodbye(() => checkout.close(), 3)
+
+    source = checkout
+  }
 
   const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
   if (source instanceof Hyperdrive || (options.live && hyperdrives.length)) {
