@@ -13,7 +13,7 @@ Usage: drives [command] [options]
 Commands:
   init                     Initializes a new storage on the cwd
   touch                    Create a writable Hyperdrive
-  mirror <src> [dst]       Mirror a drive into another drive
+  mirror <src> <dst>       Mirror a drive into another drive
   ls <src> [path]          List files of the drive
   seed [key]               Share a Hyperdrive
   download <key>           Archive download a Hyperdrive by key
@@ -66,14 +66,7 @@ Use `--live` for real-time mirroring, and `--verbose` to show all logs.
 
 Use `--dry-run` to disable writing, and remember there is `--help` for more.
 
-#### Download a Hyperdrive
-You can reuse the `mirror` command to download a `Hyperdrive` into the Corestore:
-
-```bash
-drives mirror <my-drive-key>
-```
-
-Note: it ignores `.drives`, `.git`, `.github`, `package-lock.json`, and `corestore` entries.
+Note: it ignores `.drives`, `.git`, `.github`, `.DS_Store`, `package-lock.json`, and `corestore` entries.
 
 #### List files
 ```bash
