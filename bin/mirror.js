@@ -74,11 +74,13 @@ module.exports = async function cmd (src, dst, options = {}) {
     if (first) {
       first = false
 
+      const version = destination.version ? ' | Version: ' + crayon.yellow(destination.version) : ''
+
       if (options.verbose) {
         if (m.count.add || m.count.remove || m.count.change) console.log()
-        console.log(crayon.green('✔'), 'Total files:', m.count.files, '(' + formatCount(m.count) + ')')
+        console.log(crayon.green('✔'), 'Total files:', m.count.files, '(' + formatCount(m.count) + ')' + version)
       } else {
-        status(crayon.green('✔') + ' Total files: ' + crayon.yellow(m.count.files) + ' (' + formatCount(m.count) + ')', { clear: true, done: true })
+        status(crayon.green('✔') + ' Total files: ' + crayon.yellow(m.count.files) + ' (' + formatCount(m.count) + ')' + version, { clear: true, done: true })
       }
 
       if (options.live) console.log()
