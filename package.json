@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/holepunchto/drives",
   "dependencies": {
+    "ansi-diff": "^1.1.1",
     "commander": "^9.4.1",
     "corestore": "^6.4.2",
     "debounceify": "^1.0.0",
