@@ -66,7 +66,7 @@ Use `--live` for real-time mirroring, and `--verbose` to show all logs.
 
 Use `--dry-run` to disable writing, and remember there is `--help` for more.
 
-Note: it ignores `.drives`, `.git`, `.github`, `.DS_Store`, `package-lock.json`, and `corestore` entries.
+Note: it ignores `.drives`, `.git`, `.github`, `.DS_Store`, and `package-lock.json` entries.
 
 #### List files
 ```bash
