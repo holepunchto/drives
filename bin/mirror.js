@@ -69,10 +69,10 @@ module.exports = async function cmd (src, dst, options = {}) {
     const m = source.mirror(destination, { prefix: options.prefix || '/', filter: generateFilter(options.filter), dryRun: options.dryRun })
 
     for await (const diff of m) {
-      if (options.verbose) {
-        console.log(formatDiff(diff))
-      } else {
+      if (options.silent) {
         status(formatDiff(diff), { clear: true })
+      } else {
+        console.log(formatDiff(diff))
       }
     }
 
@@ -81,11 +81,11 @@ module.exports = async function cmd (src, dst, options = {}) {
 
       const version = destination.version ? ' | Version: ' + crayon.yellow(destination.version) : ''
 
-      if (options.verbose) {
+      if (options.silent) {
+        status(crayon.green('✔') + ' Total files: ' + crayon.yellow(m.count.files) + ' (' + formatCount(m.count) + ')' + version, { clear: true, done: true })
+      } else {
         if (m.count.add || m.count.remove || m.count.change) console.log()
         console.log(crayon.green('✔'), 'Total files:', m.count.files, '(' + formatCount(m.count) + ')' + version)
-      } else {
-        status(crayon.green('✔') + ' Total files: ' + crayon.yellow(m.count.files) + ' (' + formatCount(m.count) + ')' + version, { clear: true, done: true })
       }
 
       if (options.live) console.log()

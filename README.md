@@ -62,9 +62,9 @@ Source and destination can be a folder path or a drive key.
 drives mirror <src> <dst>
 ```
 
-Use `--live` for real-time mirroring, and `--verbose` to show all logs.
+Use `--live` for real-time mirroring.
 
-Use `--dry-run` to disable writing, and remember there is `--help` for more.
+Use `--dry-run` to disable writing changes. There is `--help` for more.
 
 Note: it ignores `.drives`, `.git`, `.github`, `.DS_Store`, and `package-lock.json` entries.
 
