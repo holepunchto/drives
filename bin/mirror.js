@@ -58,6 +58,11 @@ module.exports = async function cmd (src, dst, options = {}) {
     console.log()
   }
 
+  if (options.dryRun) {
+    console.log(crayon.gray('NOTE: This is a dry run, no changes will be persisted.'))
+    console.log()
+  }
+
   let first = true
 
   const mirror = debounceify(async function () {
