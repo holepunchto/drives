@@ -101,6 +101,11 @@ For security, requests to `/.drives/*` are rejected, so mind the storage locatio
 drives info <my-drive-key>
 ```
 
+#### List drives managed
+```bash
+drives list
+```
+
 ## License
 
 Apache-2.0
