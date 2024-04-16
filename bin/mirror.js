@@ -18,6 +18,11 @@ module.exports = async function cmd (src, dst, options = {}) {
   if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> must be a string')
   if (options.filter && !Array.isArray(options.filter)) errorAndExit('--filter [ignore...] must be an array')
 
+  // For tests, testing on localhost testnet
+  const bootstrap = options.bootstrap
+    ? [{ host: '127.0.0.1', port: options.bootstrap }]
+    : null
+
   const storage = await findCorestore(options)
   await noticeStorage(storage, [src, dst])
 
@@ -42,7 +47,7 @@ module.exports = async function cmd (src, dst, options = {}) {
 
   const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
   if (source instanceof Hyperdrive || (options.live && hyperdrives.length)) {
-    const swarm = new Hyperswarm()
+    const swarm = new Hyperswarm({ bootstrap })
     goodbye(() => swarm.destroy(), 2)
 
     for (const drive of hyperdrives) swarming(swarm, drive, options)

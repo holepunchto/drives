@@ -7,7 +7,7 @@
     "drives": "./bin.js"
   },
   "scripts": {
-    "test": "standard"
+    "test": "standard && npx brittle test.js"
   },
   "repository": {
     "type": "git",
@@ -40,6 +40,10 @@
     "unix-path-resolve": "^1.0.2"
   },
   "devDependencies": {
-    "standard": "^17.0.0"
+    "brittle": "^3.5.0",
+    "hyperdht": "^6.14.0",
+    "newline-decoder": "^1.0.2",
+    "standard": "^17.0.0",
+    "test-tmp": "^1.2.1"
   }
 }
