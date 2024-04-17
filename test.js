@@ -79,7 +79,7 @@ test('integration: mirror --live flow', async t => {
           tSetupSource.pass('Source dir is mirrored')
         }
 
-        if (line.includes('new-file.txt')) {
+        if (line.includes('+ /new-file.txt')) {
           tSourceUpdate.pass('Source update detected')
         }
       }
@@ -120,7 +120,7 @@ test('integration: mirror --live flow', async t => {
           tSetupDst.pass('Setup target mirror')
         }
 
-        if (line.includes('new-file.txt')) {
+        if (line.includes('+ /new-file.txt')) {
           tDstUpdate.pass('Target update detected')
         }
       }

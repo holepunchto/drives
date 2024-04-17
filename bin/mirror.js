@@ -3,8 +3,7 @@ const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
 const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
-const debounceify = require('debounceify')
-const recursiveWatch = require('recursive-watch')
+const watchDrive = require('watch-drive')
 const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
 const errorAndExit = require('../lib/exit.js')
@@ -70,8 +69,12 @@ module.exports = async function cmd (src, dst, options = {}) {
 
   let first = true
 
-  const mirror = debounceify(async function () {
-    const m = source.mirror(destination, { prefix: options.prefix || '/', filter: generateFilter(options.filter), dryRun: options.dryRun })
+  const prefix = options.prefix || '/'
+  const dryRun = options.dryRun
+  const filter = generateFilter(options.filter)
+
+  const mirror = async function () {
+    const m = source.mirror(destination, { prefix, filter, dryRun })
 
     for await (const diff of m) {
       if (options.silent) {
@@ -95,29 +98,63 @@ module.exports = async function cmd (src, dst, options = {}) {
 
       if (options.live) console.log()
     }
-  })
+  }
 
+  // TODO: reason on what happens to changes occurring
+  // while mirror() runs, before the watcher iter is consumed
+  let watcher = null
   if (options.live) {
-    const unwatch = watch(source, mirror)
-    goodbye(() => unwatch(), 1)
+    // No need to destroy, clean exit is just ctrl-c in live mode
+    watcher = watchDrive(source, prefix)
   }
 
   await mirror()
 
-  if (!options.live) goodbye.exit()
-}
-
-function watch (drive, cb) {
-  if (drive instanceof Localdrive) {
-    return recursiveWatch(drive.root, cb)
+  if (!watcher) {
+    goodbye.exit()
+    return
   }
 
-  if (drive instanceof Hyperdrive) {
-    drive.db.feed.on('append', cb)
-    return () => drive.db.feed.off('append', cb)
-  }
+  for await (const { diff } of watcher) {
+    for (const { key } of diff) {
+      if (!filter(key)) continue
 
-  errorAndExit('Invalid drive')
+      const srcEntry = await source.entry(key)
+      const tgtEntry = await destination.entry(key)
+      // TODO: reason on whether we need to check same-ness
+
+      const isDelete = srcEntry === null
+      const isNew = tgtEntry === null
+
+      const diffObj = {
+        key,
+        bytesRemoved: blobLength(tgtEntry),
+        bytesAdded: blobLength(srcEntry),
+        op: isDelete
+          ? 'remove'
+          : isNew ? 'add' : 'change'
+      }
+
+      if (options.silent) {
+        status(formatDiff(diffObj), { clear: true })
+      } else {
+        console.log(formatDiff(diffObj))
+      }
+
+      if (dryRun) continue
+
+      if (isDelete) {
+        await destination.del(key)
+      } else if (srcEntry.value.linkname) {
+        await destination.symlink(key, srcEntry.value.linkname)
+      } else {
+        await pipeline(
+          source.createReadStream(srcEntry),
+          destination.createWriteStream(key, { executable: srcEntry.value.executable, metadata: srcEntry.value.metadata })
+        )
+      }
+    }
+  }
 }
 
 function getDrivePath (arg, type) {
@@ -166,4 +203,17 @@ function formatCount (count) {
 function status (msg, opts = {}) {
   const clear = '\x1B[2K\x1B[200D'
   process.stdout.write((opts.clear ? clear : '') + msg + (opts.done ? '\n' : ''))
+}
+
+function pipeline (rs, ws) {
+  return new Promise((resolve, reject) => {
+    rs.pipe(ws, (err) => {
+      if (err) reject(err)
+      else resolve()
+    })
+  })
+}
+
+function blobLength (entry) {
+  return entry?.value.blob ? entry.value.blob.byteLength : 0
 }

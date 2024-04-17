@@ -37,7 +37,8 @@
     "serve-drive": "^2.2.0",
     "tiny-byte-size": "^1.1.0",
     "tiny-crayon": "^1.0.5",
-    "unix-path-resolve": "^1.0.2"
+    "unix-path-resolve": "^1.0.2",
+    "watch-drive": "^2.0.1"
   },
   "devDependencies": {
     "brittle": "^3.5.0",
