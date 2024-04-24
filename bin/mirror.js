@@ -102,8 +102,6 @@ module.exports = async function cmd (src, dst, options = {}) {
     }
   }
 
-  // TODO: reason on what happens to changes occurring
-  // while mirror() runs, before the watcher iter is consumed
   let watcher = null
   if (options.live) {
     // No need for teardown logic on the watcher (with goodbye handler)
