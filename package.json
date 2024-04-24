@@ -7,7 +7,7 @@
     "drives": "./bin.js"
   },
   "scripts": {
-    "test": "standard && npx brittle test.js"
+    "test": "standard && brittle test.js"
   },
   "repository": {
     "type": "git",
