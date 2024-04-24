@@ -1,4 +1,5 @@
 const path = require('path')
+const { once } = require('events')
 const Hyperdrive = require('hyperdrive')
 const Localdrive = require('localdrive')
 const Hyperswarm = require('hyperswarm')
@@ -6,6 +7,7 @@ const goodbye = require('graceful-goodbye')
 const watchDrive = require('watch-drive')
 const crayon = require('tiny-crayon')
 const byteSize = require('tiny-byte-size')
+const streamEquals = require('binary-stream-equals')
 const errorAndExit = require('../lib/exit.js')
 const getDrive = require('../lib/get-drive.js')
 const swarming = require('../lib/swarming.js')
@@ -104,8 +106,12 @@ module.exports = async function cmd (src, dst, options = {}) {
   // while mirror() runs, before the watcher iter is consumed
   let watcher = null
   if (options.live) {
-    // No need to destroy, clean exit is just ctrl-c in live mode
-    watcher = watchDrive(source, prefix)
+    // No need for teardown logic on the watcher (with goodbye handler)
+    // It is fine to just end the program whenever
+    watcher = watchDrive(source, prefix, { eagerOpen: true })
+
+    // Note: without eagerOpen this would hang forever
+    await once(watcher, 'open')
   }
 
   await mirror()
@@ -121,7 +127,9 @@ module.exports = async function cmd (src, dst, options = {}) {
 
       const srcEntry = await source.entry(key)
       const tgtEntry = await destination.entry(key)
-      // TODO: reason on whether we need to check same-ness
+
+      if (await same(srcEntry, tgtEntry, source, destination)) continue
+
 
       const isDelete = srcEntry === null
       const isNew = tgtEntry === null
@@ -216,4 +224,35 @@ function pipeline (rs, ws) {
 
 function blobLength (entry) {
   return entry?.value.blob ? entry.value.blob.byteLength : 0
+}
+
+// Source: adapted from https://github.com/holepunchto/mirror-drive/blob/037acd7d2566915d43d7dc62b4b30d15522b9df9/index.js#L126-L140
+async function same (srcEntry, dstEntry, srcDrive, dstDrive) {
+  if (!dstEntry) return false
+
+  if (srcEntry.value.linkname || dstEntry.value.linkname) {
+    return srcEntry.value.linkname === dstEntry.value.linkname
+  }
+
+  if (srcEntry.value.executable !== dstEntry.value.executable) return false
+
+  if (!sizeEquals(srcEntry, dstEntry)) return false
+
+  // TODO: consider optimising with metadata, by comparing if supported:
+  // if (srcDrive.supportsMetadata && dstDrive.supportsMetadata)...
+
+  return streamEquals(
+    srcDrive.createReadStream(srcEntry),
+    dstDrive.createReadStream(dstEntry)
+  )
+}
+
+function sizeEquals (srcEntry, dstEntry) {
+  const srcBlob = srcEntry.value.blob
+  const dstBlob = dstEntry.value.blob
+
+  if (!srcBlob && !dstBlob) return true
+  if (!srcBlob || !dstBlob) return false
+
+  return srcBlob.byteLength === dstBlob.byteLength
 }

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/holepunchto/drives",
   "dependencies": {
     "ansi-diff": "^1.1.1",
+    "binary-stream-equals": "^1.0.0",
     "commander": "^9.4.1",
     "corestore": "^6.4.2",
     "debounceify": "^1.0.0",
@@ -30,6 +31,7 @@
     "hyperdrive": "^11.0.1",
     "hyperswarm": "^4.3.7",
     "localdrive": "^1.4.1",
+    "localwatch": "holepunchto/localwatch#add-eager-open-opt",
     "minimatch": "^9.0.0",
     "mirror-drive": "^1.2.2",
     "recursive-watch": "^1.1.4",
@@ -38,7 +40,7 @@
     "tiny-byte-size": "^1.1.0",
     "tiny-crayon": "^1.0.5",
     "unix-path-resolve": "^1.0.2",
-    "watch-drive": "^2.0.1"
+    "watch-drive": "hdegroote/watch-drive#eager-open-opt"
   },
   "devDependencies": {
     "brittle": "^3.5.0",
