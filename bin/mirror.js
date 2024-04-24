@@ -130,7 +130,6 @@ module.exports = async function cmd (src, dst, options = {}) {
 
       if (await same(srcEntry, tgtEntry, source, destination)) continue
 
-
       const isDelete = srcEntry === null
       const isNew = tgtEntry === null
 
