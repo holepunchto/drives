@@ -3,6 +3,12 @@
   "version": "2.9.0",
   "description": "CLI to seed, mirror, and serve a Hyperdrive or Localdrive",
   "main": "index.js",
+  "files": [
+    "bin/*.js",
+    "lib/*.js",
+    "index.js",
+    "bin.js"
+  ],
   "bin": {
     "drives": "./bin.js"
   },
