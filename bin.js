@@ -42,6 +42,7 @@ program.command('mirror')
   .option('--silent', 'Print less information')
   .option('--verbose', 'Print more information')
   .option('--storage <path>', 'Storage path')
+  .option('--bootstrap <int>', 'bootstrap port (only relevant for tests)', parseInt)
   .action(mirror)
 
 program.command('ls')

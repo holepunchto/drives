@@ -7,7 +7,7 @@
     "drives": "./bin.js"
   },
   "scripts": {
-    "test": "standard"
+    "test": "standard && brittle test.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/holepunchto/drives",
   "dependencies": {
     "ansi-diff": "^1.1.1",
+    "binary-stream-equals": "^1.0.0",
     "commander": "^9.4.1",
     "corestore": "^6.4.2",
     "debounceify": "^1.0.0",
@@ -37,9 +38,14 @@
     "serve-drive": "^2.2.0",
     "tiny-byte-size": "^1.1.0",
     "tiny-crayon": "^1.0.5",
-    "unix-path-resolve": "^1.0.2"
+    "unix-path-resolve": "^1.0.2",
+    "watch-drive": "^2.0.2"
   },
   "devDependencies": {
-    "standard": "^17.0.0"
+    "brittle": "^3.5.0",
+    "hyperdht": "^6.14.0",
+    "newline-decoder": "^1.0.2",
+    "standard": "^17.0.0",
+    "test-tmp": "^1.2.1"
   }
 }
