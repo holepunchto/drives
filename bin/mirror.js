@@ -226,6 +226,7 @@ function blobLength (entry) {
 // Source: adapted from https://github.com/holepunchto/mirror-drive/blob/037acd7d2566915d43d7dc62b4b30d15522b9df9/index.js#L126-L140
 async function same (srcEntry, dstEntry, srcDrive, dstDrive) {
   if (!dstEntry) return false
+  if (!srcEntry) return false
 
   if (srcEntry.value.linkname || dstEntry.value.linkname) {
     return srcEntry.value.linkname === dstEntry.value.linkname
