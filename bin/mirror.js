@@ -52,6 +52,7 @@ module.exports = async function cmd (src, dst, options = {}) {
     goodbye(() => swarm.destroy(), 2)
 
     for (const drive of hyperdrives) swarming(swarm, drive, options)
+    if (bootstrap) swarm.flush() // avoid race conditions for tests
   }
 
   if (options.verbose) {
