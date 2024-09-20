@@ -14,7 +14,7 @@ const EXECUTABLE = path.join(__dirname, 'bin.js')
 process.prependListener('SIGINT', () => process.exit(1))
 process.prependListener('SIGTERM', () => process.exit(1))
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 100; i++) {
   test('integration: mirror --live flow', async t => {
     t.comment('One process live mirrors a directory to a hyperdrive, while another process live mirrors that hyperdrive to another directory')
 
