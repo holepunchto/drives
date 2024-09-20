@@ -7,7 +7,7 @@ const test = require('brittle')
 const NewlineDecoder = require('newline-decoder')
 const { once } = require('events')
 
-const DEBUG = true
+const DEBUG = false
 const EXECUTABLE = path.join(__dirname, 'bin.js')
 
 // To force the process.on('exit') to be called on those exits too
