@@ -14,6 +14,7 @@ const get = require('./bin/get.js')
 const rm = require('./bin/rm.js')
 const info = require('./bin/info.js')
 const purge = require('./bin/purge.js')
+const list = require('./bin/list.js')
 
 const program = new Command()
 
@@ -117,5 +118,10 @@ program.command('purge')
   .argument('<key>', 'Drive public key')
   .option('--storage <path>', 'Storage path')
   .action(purge)
+
+program.command('list')
+  .description('List all drives managed in storage')
+  .option('--storage <path>', 'Storage path')
+  .action(list)
 
 program.parseAsync()
