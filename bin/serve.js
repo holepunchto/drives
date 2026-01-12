@@ -1,7 +1,6 @@
 const Hyperdrive = require('hyperdrive')
 const Hyperswarm = require('hyperswarm')
 const HypercoreId = require('hypercore-id-encoding')
-const http = require('http')
 const goodbye = require('graceful-goodbye')
 const graceful = require('graceful-http')
 const crayon = require('tiny-crayon')
@@ -47,24 +46,33 @@ module.exports = async function cmd (src, options = {}) {
     swarm.flush().then(done, done)
   }
 
-  const server = http.createServer()
-  const close = graceful(server)
-
   const serve = new ServeDrive({
     port: options.port,
     host: options.host,
     anyPort: !options.disableAnyPort,
-    server,
-    filter: (id, filename) => {
-      // TODO: remove "corestore" at some point
-      filename = filename.toLowerCase()
-      return !(filename.startsWith('/.drives/') || filename.startsWith('/corestore/'))
+    token: options.token !== undefined ? options.token : false,
+    get: async ({ key, filename, version }) => {
+      // Filter out internal directories
+      const lowerFilename = filename.toLowerCase()
+      if (lowerFilename.startsWith('/.drives/') || lowerFilename.startsWith('/corestore/')) {
+        return null
+      }
+
+      // For Hyperdrive, if a key is provided, check if it matches our drive's key
+      if (drive instanceof Hyperdrive) {
+        if (key !== null && !key.equals(drive.key)) {
+          return null
+        }
+      }
+
+      return drive
     }
   })
 
-  serve.add(drive, { default: true })
   await serve.ready()
 
+  const server = serve.server
+  const close = graceful(server)
   goodbye(() => close(), 1)
 
   console.log('HTTP server on http://' + getHost(server.address().address) + ':' + server.address().port)
