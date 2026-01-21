@@ -8,15 +8,24 @@ const crayon = require('tiny-crayon')
 const errorAndExit = require('../lib/exit.js')
 const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
 
-module.exports = async function cmd (key, options = {}) {
-  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')
+module.exports = async function (cmd) {
+  const key = cmd.args.key
+  const storage = cmd.flags.storage
+  const bootstrapPort = cmd.flags.bootstrap
 
-  const storage = await findCorestore(options)
-  await noticeStorage(storage)
+  if (storage && typeof storage !== 'string') errorAndExit('--storage <path> is required as string')
+
+  // For tests, testing on localhost testnet
+  const bootstrap = bootstrapPort
+    ? [{ host: '127.0.0.1', port: parseInt(bootstrapPort, 10) }]
+    : null
+
+  const storagePath = await findCorestore({ storage })
+  await noticeStorage(storagePath)
   console.log()
 
-  const swarm = new Hyperswarm()
-  const store = new Corestore(storage)
+  const swarm = new Hyperswarm({ bootstrap })
+  const store = new Corestore(storagePath)
   const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
 
   goodbye(() => swarm.destroy(), 1)

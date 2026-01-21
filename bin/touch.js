@@ -1,20 +1,20 @@
 const Corestore = require('corestore')
-const path = require('path')
 const Hyperdrive = require('hyperdrive')
 const HypercoreId = require('hypercore-id-encoding')
 const crayon = require('tiny-crayon')
 const errorAndExit = require('../lib/exit.js')
 const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
 
-module.exports = async function cmd (options = {}) {
-  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')
+module.exports = async function (cmd) {
+  const storage = cmd.flags.storage
 
-  const storage = await findCorestore(options)
-  await noticeStorage(storage)
+  if (storage && typeof storage !== 'string') errorAndExit('--storage <path> is required as string')
 
-  const store = new Corestore(storage)
-  const name = options.useCwd ? path.resolve('.') : process.hrtime.bigint().toString()
-  const ns = store.namespace(name)
+  const storagePath = await findCorestore({ storage })
+  await noticeStorage(storagePath)
+
+  const store = new Corestore(storagePath)
+  const ns = store.namespace(process.hrtime.bigint().toString())
   const drive = new Hyperdrive(ns)
   await drive.ready()
 
