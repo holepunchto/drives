@@ -26,7 +26,7 @@ const mirrorCmd = command(
 
 const seedCmd = command(
   'seed',
-  summary('Seed a Hyperdrive to the DHT network'),
+  summary('Seed a hyperdrive so others can download it'),
   arg('[key]', 'Drive public key'),
   flag('--storage [path]', 'Storage path'),
   flag('--bootstrap [port]', 'Bootstrap port (only relevant for tests)'),

@@ -38,8 +38,8 @@ test('seed to dht and got mirror from other hyperdrive', async t => {
 
   const swarm = new Hyperswarm({ bootstrap })
   t.teardown(() => swarm.destroy())
-  await swarm.join(dstDrive.discoveryKey).flushed()
   swarm.on('connection', (conn) => dstDrive.replicate(conn))
+  await swarm.join(dstDrive.discoveryKey).flushed()
 
   // wait for drive to be replicated
   await new Promise(resolve => setTimeout(resolve, 1_000))

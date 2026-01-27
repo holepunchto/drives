@@ -1,6 +1,6 @@
 # drives
 
-CLI to seed, mirror, and touch a Hyperdrive or Localdrive
+CLI to seed and mirror a Hyperdrive or Localdrive
 
 ```
 npm i -g drives
@@ -13,7 +13,7 @@ drives [flags] [command]
 Commands:
   touch              Create a writable Hyperdrive
   mirror <src> <dst> Mirror a drive into another drive
-  seed [key]         Seed a Hyperdrive to the DHT network
+  seed [key]         Seed a hyperdrive so others can download it
 ```
 
 ## API
@@ -52,7 +52,7 @@ Options:
 drives seed [my-drive-key]
 ```
 
-Seeds a Hyperdrive to the DHT network for peer discovery.
+Seed a hyperdrive so others can download it.
 
 ## License
 

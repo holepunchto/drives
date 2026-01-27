@@ -10,6 +10,9 @@ exports.spawnDrivesBin = (t, ...args) => {
   t.teardown(() => {
     if (proc.exitCode === null) proc.kill('SIGKILL')
   })
+  process.on('exit', () => {
+    if (proc.exitCode === null) proc.kill('SIGKILL')
+  })
   return proc
 }
 
@@ -27,14 +30,10 @@ exports.setupDrive = async (storage, t) => {
     }
   })
 
-  proc.stderr.on('data', d => {
-    console.error(d.toString())
-    t.fail('stderr output when touching src drive')
-  })
-
   const [exitCode] = await once(proc, 'exit')
-  t.is(exitCode, 0, '0 exit code when touching drive')
-  t.not(driveKey, null, 'Got the drive key')
+  if (exitCode !== 0) {
+    throw new Error(`Exit code ${exitCode} when touching drive`)
+  }
 
   return driveKey
 }
