@@ -12,7 +12,8 @@ const { spawnDrivesBin, waitForOutput } = require('./helpers.js')
 test('seed to dht and got mirror from other hyperdrive', async t => {
   // create a hyperdrive and some dummy data
   const srcDir = await tmpDir(t)
-  const srcStore = new Corestore(path.join(srcDir, 'corestore'))
+  const srcStorage = path.join(srcDir, 'corestore')
+  const srcStore = new Corestore(srcStorage)
   const srcDrive = new Hyperdrive(srcStore)
   await srcDrive.ready()
   await srcDrive.put('test-file.txt', b4a.from('Test content'))
@@ -22,7 +23,7 @@ test('seed to dht and got mirror from other hyperdrive', async t => {
   const { bootstrap } = await createTestnet(3, t.teardown)
   const bootstrapPort = bootstrap[0].port
 
-  const seedProc = spawnDrivesBin(t, 'seed', '--storage', srcDir, '--bootstrap', bootstrapPort, IdEnc.encode(srcDrive.key))
+  const seedProc = spawnDrivesBin(t, 'seed', '--storage', srcStorage, '--bootstrap', bootstrapPort, IdEnc.encode(srcDrive.key))
 
   // Wait for the announcement
   const announced = await waitForOutput(seedProc, 'Announced', 5_000)

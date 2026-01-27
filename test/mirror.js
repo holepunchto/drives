@@ -196,7 +196,7 @@ test('mirror --version checkouts specific version', async t => {
 
   const mirrorProc1 = spawnDrivesBin(t,
     'mirror',
-    '--storage', path.join(dir, 'src-storage'),
+    '--storage', srcStorage,
     '--version', version1,
     driveKey,
     dstDir1
@@ -230,7 +230,7 @@ test('mirror --version checkouts specific version', async t => {
 
   const mirrorProc2 = spawnDrivesBin(t,
     'mirror',
-    '--storage', path.join(dir, 'src-storage'),
+    '--storage', srcStorage,
     '--version', version2,
     driveKey,
     dstDir2

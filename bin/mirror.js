@@ -11,21 +11,15 @@ const getDrive = require('../lib/get-drive.js')
 const swarming = require('../lib/swarming.js')
 const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
 
-module.exports = async function (cmd) {
-  const src = cmd.args.src
-  const dst = cmd.args.dst
-  const live = cmd.flags.live
-  const storageFlag = cmd.flags.storage
-  const bootstrapPort = cmd.flags.bootstrap
-
-  if (storageFlag && typeof storageFlag !== 'string') errorAndExit('--storage <path> must be a string')
+module.exports = async function mirror (src, dst, options = {}) {
+  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> must be a string')
 
   // For tests, testing on localhost testnet
-  const bootstrap = bootstrapPort
-    ? [{ host: '127.0.0.1', port: parseInt(bootstrapPort, 10) }]
+  const bootstrap = options.bootstrap
+    ? [{ host: '127.0.0.1', port: parseInt(options.bootstrap, 10) }]
     : null
 
-  const storage = await findCorestore({ storage: storageFlag })
+  const storage = findCorestore(options.storage)
   await noticeStorage(storage, [src, dst])
 
   let source = getDrive(src, storage)
@@ -37,8 +31,8 @@ module.exports = async function (cmd) {
   await source.ready()
   await destination.ready()
 
-  if (cmd.flags.version) {
-    const version = parseInt(cmd.flags.version, 10)
+  if (options.version) {
+    const version = parseInt(options.version, 10)
     if (!version) errorAndExit('Invalid --version value')
 
     const checkout = source.checkout(version)
@@ -48,7 +42,7 @@ module.exports = async function (cmd) {
   }
 
   const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
-  if (source instanceof Hyperdrive || (live && hyperdrives.length)) {
+  if (source instanceof Hyperdrive || (options.live && hyperdrives.length)) {
     const swarm = new Hyperswarm({ bootstrap })
     goodbye(() => swarm.destroy(), 2)
 
@@ -68,17 +62,17 @@ module.exports = async function (cmd) {
     if (first) {
       first = false
 
-      const v = destination.version ? ' | Version: ' + crayon.yellow(destination.version) : ''
+      const version = destination.version ? ' | Version: ' + crayon.yellow(destination.version) : ''
 
       if (m.count.add || m.count.remove || m.count.change) console.log()
-      console.log(crayon.green('OK'), 'Total files:', m.count.files, '(' + formatCount(m.count) + ')' + v)
+      console.log(crayon.green('OK'), 'Total files:', m.count.files, '(' + formatCount(m.count) + ')' + version)
 
-      if (live) console.log()
+      if (options.live) console.log()
     }
   }
 
   let watcher = null
-  if (live) {
+  if (options.live) {
     // No need for teardown logic on the watcher (with goodbye handler)
     // It is fine to just end the program whenever
     watcher = watchDrive(source, '/', { eagerOpen: true })

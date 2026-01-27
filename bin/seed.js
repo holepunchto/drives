@@ -8,19 +8,15 @@ const crayon = require('tiny-crayon')
 const errorAndExit = require('../lib/exit.js')
 const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
 
-module.exports = async function (cmd) {
-  const key = cmd.args.key
-  const storage = cmd.flags.storage
-  const bootstrapPort = cmd.flags.bootstrap
-
-  if (storage && typeof storage !== 'string') errorAndExit('--storage <path> is required as string')
+module.exports = async function seed (key, options = {}) {
+  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')
 
   // For tests, testing on localhost testnet
-  const bootstrap = bootstrapPort
-    ? [{ host: '127.0.0.1', port: parseInt(bootstrapPort, 10) }]
+  const bootstrap = options.bootstrap
+    ? [{ host: '127.0.0.1', port: parseInt(options.bootstrap, 10) }]
     : null
 
-  const storagePath = await findCorestore({ storage })
+  const storagePath = findCorestore(options.storage)
   await noticeStorage(storagePath)
   console.log()
 

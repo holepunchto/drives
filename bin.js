@@ -9,7 +9,7 @@ const touchCmd = command(
   'touch',
   summary('Create a writable Hyperdrive'),
   flag('--storage [path]', 'Storage path'),
-  touch
+  (cmd) => touch({ storage: cmd.flags.storage })
 )
 
 const mirrorCmd = command(
@@ -21,7 +21,12 @@ const mirrorCmd = command(
   flag('--version [v]', 'Use a specific version'),
   flag('--storage [path]', 'Storage path'),
   flag('--bootstrap [port]', 'Bootstrap port (only relevant for tests)'),
-  mirror
+  (cmd) => mirror(cmd.args.src, cmd.args.dst, {
+    live: cmd.flags.live,
+    version: cmd.flags.version,
+    storage: cmd.flags.storage,
+    bootstrap: cmd.flags.bootstrap
+  })
 )
 
 const seedCmd = command(
@@ -30,7 +35,10 @@ const seedCmd = command(
   arg('[key]', 'Drive public key'),
   flag('--storage [path]', 'Storage path'),
   flag('--bootstrap [port]', 'Bootstrap port (only relevant for tests)'),
-  seed
+  (cmd) => seed(cmd.args.key, {
+    storage: cmd.flags.storage,
+    bootstrap: cmd.flags.bootstrap
+  })
 )
 
 const cmd = command(
