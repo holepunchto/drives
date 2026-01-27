@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
 const { command, flag, arg, summary, header } = require('paparam')
+const Corestore = require('corestore')
+const Hyperswarm = require('hyperswarm')
+const goodbye = require('graceful-goodbye')
+const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
 const touch = require('./bin/touch.js')
 const seed = require('./bin/seed.js')
 const mirror = require('./bin/mirror.js')
@@ -9,7 +13,40 @@ const touchCmd = command(
   'touch',
   summary('Create a writable Hyperdrive'),
   flag('--storage [path]', 'Storage path'),
-  (cmd) => touch({ storage: cmd.flags.storage })
+  async (cmd) => {
+    const storage = findCorestore(cmd.flags.storage)
+    await noticeStorage(storage)
+
+    const store = new Corestore(storage)
+    goodbye(() => store.close())
+
+    await touch(store)
+  }
+)
+
+const seedCmd = command(
+  'seed',
+  summary('Seed a hyperdrive so others can download it'),
+  arg('[key]', 'Drive public key'),
+  flag('--storage [path]', 'Storage path'),
+  flag('--bootstrap [port]', 'Bootstrap port (only relevant for tests)'),
+  async (cmd) => {
+    const bootstrapPort = cmd.flags.bootstrap
+    const bootstrap = bootstrapPort
+      ? [{ host: '127.0.0.1', port: parseInt(bootstrapPort, 10) }]
+      : null
+
+    const storage = findCorestore(cmd.flags.storage)
+    await noticeStorage(storage)
+
+    const store = new Corestore(storage)
+    goodbye(() => swarm.destroy())
+
+    const swarm = new Hyperswarm({ bootstrap })
+    goodbye(() => store.close())
+
+    await seed(store, swarm, cmd.args.key)
+  }
 )
 
 const mirrorCmd = command(
@@ -21,24 +58,29 @@ const mirrorCmd = command(
   flag('--version [v]', 'Use a specific version'),
   flag('--storage [path]', 'Storage path'),
   flag('--bootstrap [port]', 'Bootstrap port (only relevant for tests)'),
-  (cmd) => mirror(cmd.args.src, cmd.args.dst, {
-    live: cmd.flags.live,
-    version: cmd.flags.version,
-    storage: cmd.flags.storage,
-    bootstrap: cmd.flags.bootstrap
-  })
-)
+  async (cmd) => {
+    const src = cmd.args.src
+    const dst = cmd.args.dst
+    const bootstrapPort = cmd.flags.bootstrap
 
-const seedCmd = command(
-  'seed',
-  summary('Seed a hyperdrive so others can download it'),
-  arg('[key]', 'Drive public key'),
-  flag('--storage [path]', 'Storage path'),
-  flag('--bootstrap [port]', 'Bootstrap port (only relevant for tests)'),
-  (cmd) => seed(cmd.args.key, {
-    storage: cmd.flags.storage,
-    bootstrap: cmd.flags.bootstrap
-  })
+    const bootstrap = bootstrapPort
+      ? [{ host: '127.0.0.1', port: parseInt(bootstrapPort, 10) }]
+      : null
+
+    const storage = findCorestore(cmd.flags.storage)
+    await noticeStorage(storage, [src, dst])
+
+    const store = new Corestore(storage)
+    goodbye(() => swarm.destroy())
+
+    const swarm = new Hyperswarm({ bootstrap })
+    goodbye(() => store.close())
+
+    await mirror(store, swarm, src, dst, {
+      live: cmd.flags.live,
+      version: cmd.flags.version
+    })
+  }
 )
 
 const cmd = command(

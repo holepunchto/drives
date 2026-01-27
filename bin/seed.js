@@ -1,31 +1,12 @@
-const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
-const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 const HypercoreId = require('hypercore-id-encoding')
 const ansiDiff = require('ansi-diff')
 const crayon = require('tiny-crayon')
-const errorAndExit = require('../lib/exit.js')
-const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
 
-module.exports = async function seed (key, options = {}) {
-  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')
-
-  // For tests, testing on localhost testnet
-  const bootstrap = options.bootstrap
-    ? [{ host: '127.0.0.1', port: parseInt(options.bootstrap, 10) }]
-    : null
-
-  const storagePath = findCorestore(options.storage)
-  await noticeStorage(storagePath)
-  console.log()
-
-  const swarm = new Hyperswarm({ bootstrap })
-  const store = new Corestore(storagePath)
+module.exports = async function seed (store, swarm, key) {
   const drive = new Hyperdrive(store, key ? HypercoreId.decode(key) : null)
-
-  goodbye(() => swarm.destroy(), 1)
-  goodbye(() => drive.close(), 2)
+  goodbye(() => drive.close())
 
   await drive.ready()
 

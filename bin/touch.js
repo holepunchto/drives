@@ -1,19 +1,13 @@
-const Corestore = require('corestore')
 const Hyperdrive = require('hyperdrive')
 const HypercoreId = require('hypercore-id-encoding')
 const crayon = require('tiny-crayon')
-const errorAndExit = require('../lib/exit.js')
-const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
+const goodbye = require('graceful-goodbye')
 
-module.exports = async function touch (options = {}) {
-  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> is required as string')
-
-  const storage = findCorestore(options.storage)
-  await noticeStorage(storage)
-
-  const store = new Corestore(storage)
+module.exports = async function touch (store) {
   const ns = store.namespace(process.hrtime.bigint().toString())
   const drive = new Hyperdrive(ns)
+  goodbye(() => drive.close())
+
   await drive.ready()
 
   console.log('New drive:', crayon.magenta(HypercoreId.encode(drive.key)))

@@ -1,6 +1,5 @@
 const { once } = require('events')
 const Hyperdrive = require('hyperdrive')
-const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 const watchDrive = require('watch-drive')
 const crayon = require('tiny-crayon')
@@ -9,24 +8,13 @@ const streamEquals = require('binary-stream-equals')
 const errorAndExit = require('../lib/exit.js')
 const getDrive = require('../lib/get-drive.js')
 const swarming = require('../lib/swarming.js')
-const { findCorestore, noticeStorage } = require('../lib/find-corestore.js')
 
-module.exports = async function mirror (src, dst, options = {}) {
-  if (options.storage && typeof options.storage !== 'string') errorAndExit('--storage <path> must be a string')
+module.exports = async function mirror (store, swarm, src, dst, options = {}) {
+  let source = getDrive(src, store)
+  goodbye(() => source.close())
 
-  // For tests, testing on localhost testnet
-  const bootstrap = options.bootstrap
-    ? [{ host: '127.0.0.1', port: parseInt(options.bootstrap, 10) }]
-    : null
-
-  const storage = findCorestore(options.storage)
-  await noticeStorage(storage, [src, dst])
-
-  let source = getDrive(src, storage)
-  const destination = getDrive(dst, source.corestore ? source.corestore : storage)
-
-  goodbye(() => source.close(), 3)
-  goodbye(() => destination.close(), 3)
+  const destination = getDrive(dst, source.corestore ? source.corestore : store)
+  goodbye(() => destination.close())
 
   await source.ready()
   await destination.ready()
@@ -36,23 +24,19 @@ module.exports = async function mirror (src, dst, options = {}) {
     if (!version) errorAndExit('Invalid --version value')
 
     const checkout = source.checkout(version)
-    goodbye(() => checkout.close(), 3)
+    goodbye(() => checkout.close())
 
     source = checkout
   }
 
   const hyperdrives = [source, destination].filter(drive => (drive instanceof Hyperdrive))
   if (source instanceof Hyperdrive || (options.live && hyperdrives.length)) {
-    const swarm = new Hyperswarm({ bootstrap })
-    goodbye(() => swarm.destroy(), 2)
-
     for (const drive of hyperdrives) swarming(swarm, drive)
-    if (bootstrap) swarm.flush() // avoid race conditions for tests
   }
 
   let first = true
 
-  const mirror = async function () {
+  const doMirror = async function () {
     const m = source.mirror(destination, { prefix: '/' })
 
     for await (const diff of m) {
@@ -81,7 +65,7 @@ module.exports = async function mirror (src, dst, options = {}) {
     await once(watcher, 'open')
   }
 
-  await mirror()
+  await doMirror()
 
   if (!watcher) {
     goodbye.exit()
