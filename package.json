@@ -4,7 +4,6 @@
   "description": "CLI to seed, mirror, and touch a Hyperdrive or Localdrive",
   "main": "index.js",
   "files": [
-    "bin/*.js",
     "lib/*.js",
     "index.js",
     "bin.js"

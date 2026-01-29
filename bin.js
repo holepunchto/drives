@@ -5,9 +5,9 @@ const Corestore = require('corestore')
 const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
-const touch = require('./bin/touch.js')
-const seed = require('./bin/seed.js')
-const mirror = require('./bin/mirror.js')
+const touch = require('./lib/touch.js')
+const seed = require('./lib/seed.js')
+const mirror = require('./lib/mirror.js')
 
 const touchCmd = command(
   'touch',
