@@ -1,13 +1,45 @@
 #!/usr/bin/env node
 
+const path = require('path')
+const os = require('os')
+const fsp = require('fs/promises')
 const { command, flag, arg, summary, header } = require('paparam')
 const Corestore = require('corestore')
 const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
-const { findCorestore, noticeStorage } = require('./lib/find-corestore.js')
+const crayon = require('tiny-crayon')
+const driveType = require('./lib/drive-id.js')
 const touch = require('./lib/touch.js')
 const seed = require('./lib/seed.js')
 const mirror = require('./lib/mirror.js')
+
+const DEFAULT_STORAGE = path.join(os.homedir(), '.drives', 'corestore')
+
+function findCorestore (storage) {
+  if (storage) return path.resolve(storage)
+  return DEFAULT_STORAGE
+}
+
+async function stat (path) {
+  try {
+    return await fsp.stat(path)
+  } catch (error) {
+    if (error.code === 'ENOENT') return null
+    throw error
+  }
+}
+
+async function noticeStorage (dirname, list) {
+  if (list) {
+    const ids = list.map(driveType)
+    if (!ids.includes('key')) return
+  }
+
+  const exists = await stat(dirname)
+
+  if (exists) console.log(crayon.gray('Storage:', dirname))
+  else console.log(crayon.red('Notice:'), crayon.gray('new storage at', dirname))
+}
 
 const touchCmd = command(
   'touch',
@@ -75,6 +107,8 @@ const mirrorCmd = command(
 
     const swarm = new Hyperswarm({ bootstrap })
     goodbye(() => store.close())
+
+    swarm.on('connection', (socket) => store.replicate(socket))
 
     await mirror(store, swarm, src, dst, {
       live: cmd.flags.live,
