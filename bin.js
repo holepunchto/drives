@@ -53,6 +53,8 @@ const touchCmd = command(
     goodbye(() => store.close())
 
     await touch(store)
+
+    goodbye.exit()
   }
 )
 
@@ -78,6 +80,8 @@ const seedCmd = command(
     goodbye(() => store.close())
 
     await seed(store, swarm, cmd.args.key)
+
+    goodbye.exit()
   }
 )
 
@@ -103,10 +107,10 @@ const mirrorCmd = command(
     await noticeStorage(storage, [src, dst])
 
     const store = new Corestore(storage)
-    goodbye(() => swarm.destroy())
+    goodbye(() => store.close())
 
     const swarm = new Hyperswarm({ bootstrap })
-    goodbye(() => store.close())
+    goodbye(() => swarm.destroy())
 
     swarm.on('connection', (socket) => store.replicate(socket))
 
@@ -114,6 +118,8 @@ const mirrorCmd = command(
       live: cmd.flags.live,
       version: cmd.flags.version
     })
+
+    goodbye.exit()
   }
 )
 
