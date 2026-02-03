@@ -12,7 +12,7 @@
     "drives": "./bin.js"
   },
   "scripts": {
-    "test": "standard && brittle test/*.js"
+    "test": "prettier --check . && lunte && brittle test/*.js"
   },
   "repository": {
     "type": "git",
@@ -42,8 +42,10 @@
     "b4a": "^1.7.3",
     "brittle": "^3.5.0",
     "hyperdht": "^6.27.0",
+    "lunte": "^1.6.0",
     "newline-decoder": "^1.0.2",
-    "standard": "^17.0.0",
+    "prettier": "^3.8.1",
+    "prettier-config-holepunch": "^2.0.0",
     "test-tmp": "^1.2.1"
   }
 }
