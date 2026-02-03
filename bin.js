@@ -1,121 +1,134 @@
 #!/usr/bin/env node
 
-const { Command } = require('commander')
-const init = require('./bin/init.js')
-const touch = require('./bin/touch.js')
-const download = require('./bin/download.js')
-const seed = require('./bin/seed.js')
-const mirror = require('./bin/mirror.js')
-const serve = require('./bin/serve.js')
-const ls = require('./bin/ls.js')
-const put = require('./bin/put.js')
-const entry = require('./bin/entry.js')
-const get = require('./bin/get.js')
-const rm = require('./bin/rm.js')
-const info = require('./bin/info.js')
-const purge = require('./bin/purge.js')
+const path = require('path')
+const os = require('os')
+const fsp = require('fs/promises')
+const { command, flag, arg, summary, header } = require('paparam')
+const Corestore = require('corestore')
+const Hyperswarm = require('hyperswarm')
+const goodbye = require('graceful-goodbye')
+const crayon = require('tiny-crayon')
+const driveType = require('./lib/drive-id.js')
+const touch = require('./lib/touch.js')
+const seed = require('./lib/seed.js')
+const mirror = require('./lib/mirror.js')
 
-const program = new Command()
+const DEFAULT_STORAGE = path.join(os.homedir(), '.drives', 'corestore')
 
-program
-  .description('CLI to seed, mirror, and serve a Hyperdrive or Localdrive')
+function findCorestore (storage) {
+  if (storage) return path.resolve(storage)
+  return DEFAULT_STORAGE
+}
 
-program.command('init')
-  .description('Initializes a new storage on the cwd')
-  .action(init)
+async function stat (path) {
+  try {
+    return await fsp.stat(path)
+  } catch (error) {
+    if (error.code === 'ENOENT') return null
+    throw error
+  }
+}
 
-program.command('touch')
-  .description('Create a writable Hyperdrive')
-  .option('--use-cwd', 'Use cwd as the namespace')
-  .option('--storage <path>', 'Storage path')
-  .action(touch)
+async function noticeStorage (dirname, list) {
+  if (list) {
+    const ids = list.map(driveType)
+    if (!ids.includes('key')) return
+  }
 
-program.command('mirror')
-  .description('Mirror a drive into another drive')
-  .argument('<src>', 'Source drive (key or path)')
-  .argument('<dst>', 'Destination drive (key or path)')
-  .option('--live', 'Enables real-time sharing')
-  .option('--prefix <path>', 'Prefix entries path')
-  .option('--filter [ignore...]', 'Ignore entries')
-  .option('--dry-run', 'Disables writing')
-  .option('--version <v>', 'Use a specific version')
-  .option('--silent', 'Print less information')
-  .option('--verbose', 'Print more information')
-  .option('--storage <path>', 'Storage path')
-  .option('--bootstrap <int>', 'bootstrap port (only relevant for tests)', parseInt)
-  .action(mirror)
+  const exists = await stat(dirname)
 
-program.command('ls')
-  .description('List files of the drive')
-  .argument('<src>', 'Source drive (key or path)')
-  .argument('[path]', 'Filename')
-  .option('--recursive, -r', 'Recursive listing')
-  .option('--prefix <path>', 'Prefix entries path')
-  .option('--storage <path>', 'Storage path')
-  .action(ls)
+  if (exists) console.log(crayon.gray('Storage:', dirname))
+  else console.log(crayon.red('Notice:'), crayon.gray('new storage at', dirname))
+}
 
-program.command('seed')
-  .description('Seed a Hyperdrive to the DHT network')
-  .argument('[key]', 'Drive public key')
-  .option('--storage <path>', 'Storage path')
-  .action(seed)
+const touchCmd = command(
+  'touch',
+  summary('Create a writable Hyperdrive'),
+  flag('--storage [path]', 'Storage path'),
+  async (cmd) => {
+    const storage = findCorestore(cmd.flags.storage)
+    await noticeStorage(storage)
 
-program.command('download')
-  .description('Archive download a Hyperdrive by key')
-  .argument('<key>', 'Drive public key')
-  .option('--storage <path>', 'Storage path')
-  .action(download)
+    const store = new Corestore(storage)
+    goodbye(() => store.close())
 
-program.command('serve')
-  .description('Creates a HTTP drive server')
-  .argument('<src>', 'Source drive (key or path)')
-  .option('--host <address>', 'Bind to address')
-  .option('--port <number>', 'Bind to port')
-  .option('--disable-any-port', 'Disable random port if port in use')
-  .option('--verbose', 'Print more information')
-  .option('--storage <path>', 'Storage path')
-  .action(serve)
+    await touch(store)
 
-program.command('put')
-  .description('Create a file')
-  .argument('<src>', 'Source drive (key or path)')
-  .argument('<path>', 'Filename')
-  .argument('<blob>', 'Content')
-  .option('--storage <path>', 'Storage path')
-  .action(put)
+    goodbye.exit()
+  }
+)
 
-program.command('entry')
-  .description('Show a single entry file')
-  .argument('<src>', 'Source drive (key or path)')
-  .argument('<path>', 'Filename')
-  .option('--storage <path>', 'Storage path')
-  .action(entry)
+const seedCmd = command(
+  'seed',
+  summary('Seed a hyperdrive so others can download it'),
+  arg('[key]', 'Drive public key'),
+  flag('--storage [path]', 'Storage path'),
+  flag('--bootstrap [port]', 'Bootstrap port (only relevant for tests)'),
+  async (cmd) => {
+    const bootstrapPort = cmd.flags.bootstrap
+    const bootstrap = bootstrapPort
+      ? [{ host: '127.0.0.1', port: parseInt(bootstrapPort, 10) }]
+      : null
 
-program.command('get')
-  .description('Show the file content')
-  .argument('<src>', 'Source drive (key or path)')
-  .argument('<path>', 'Filename')
-  .option('--storage <path>', 'Storage path')
-  .action(get)
+    const storage = findCorestore(cmd.flags.storage)
+    await noticeStorage(storage)
 
-program.command('rm')
-  .description('Delete a file')
-  .argument('<src>', 'Source drive (key or path)')
-  .argument('<path>', 'Filename')
-  .option('-r, --recursive', 'Recursively delete all sub files')
-  .option('--storage <path>', 'Storage path')
-  .action(rm)
+    const store = new Corestore(storage)
+    goodbye(() => swarm.destroy())
 
-program.command('info')
-  .description('Show info about the Hyperdrive')
-  .argument('<key>', 'Drive public key')
-  .option('--storage <path>', 'Storage path')
-  .action(info)
+    const swarm = new Hyperswarm({ bootstrap })
+    goodbye(() => store.close())
 
-program.command('purge')
-  .description('Delete all local storage of the drive')
-  .argument('<key>', 'Drive public key')
-  .option('--storage <path>', 'Storage path')
-  .action(purge)
+    await seed(store, swarm, cmd.args.key)
 
-program.parseAsync()
+    goodbye.exit()
+  }
+)
+
+const mirrorCmd = command(
+  'mirror',
+  summary('Mirror a drive into another drive'),
+  arg('<src>', 'Source drive (key or path)'),
+  arg('<dst>', 'Destination drive (key or path)'),
+  flag('--live', 'Enables real-time mirroring'),
+  flag('--version [v]', 'Use a specific version'),
+  flag('--storage [path]', 'Storage path'),
+  flag('--bootstrap [port]', 'Bootstrap port (only relevant for tests)'),
+  async (cmd) => {
+    const src = cmd.args.src
+    const dst = cmd.args.dst
+    const bootstrapPort = cmd.flags.bootstrap
+
+    const bootstrap = bootstrapPort
+      ? [{ host: '127.0.0.1', port: parseInt(bootstrapPort, 10) }]
+      : null
+
+    const storage = findCorestore(cmd.flags.storage)
+    await noticeStorage(storage, [src, dst])
+
+    const store = new Corestore(storage)
+    goodbye(() => store.close())
+
+    const swarm = new Hyperswarm({ bootstrap })
+    goodbye(() => swarm.destroy())
+
+    swarm.on('connection', (socket) => store.replicate(socket))
+
+    await mirror(store, swarm, src, dst, {
+      live: cmd.flags.live,
+      version: cmd.flags.version
+    })
+
+    goodbye.exit()
+  }
+)
+
+const cmd = command(
+  'drives',
+  header('CLI to seed, mirror, and touch a Hyperdrive or Localdrive'),
+  touchCmd,
+  mirrorCmd,
+  seedCmd
+)
+
+cmd.parse()

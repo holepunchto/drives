@@ -1,10 +1,9 @@
 {
   "name": "drives",
   "version": "2.9.1",
-  "description": "CLI to seed, mirror, and serve a Hyperdrive or Localdrive",
+  "description": "CLI to seed, mirror, and touch a Hyperdrive or Localdrive",
   "main": "index.js",
   "files": [
-    "bin/*.js",
     "lib/*.js",
     "index.js",
     "bin.js"
@@ -13,7 +12,7 @@
     "drives": "./bin.js"
   },
   "scripts": {
-    "test": "standard && brittle test.js"
+    "test": "standard && brittle test/*.js"
   },
   "repository": {
     "type": "git",
@@ -28,28 +27,21 @@
   "dependencies": {
     "ansi-diff": "^1.1.1",
     "binary-stream-equals": "^1.0.0",
-    "commander": "^9.4.1",
-    "corestore": "^6.4.2",
-    "debounceify": "^1.0.0",
+    "corestore": "^7.0.0",
     "graceful-goodbye": "^1.2.0",
-    "graceful-http": "^1.0.0",
     "hypercore-id-encoding": "^1.0.2",
-    "hyperdrive": "^11.0.1",
-    "hyperswarm": "^4.3.7",
-    "localdrive": "^1.4.1",
-    "minimatch": "^9.0.0",
-    "mirror-drive": "^1.2.2",
-    "recursive-watch": "^1.1.4",
-    "safety-catch": "^1.0.2",
-    "serve-drive": "^2.2.0",
+    "hyperdrive": "^13.1.1",
+    "hyperswarm": "^4.16.0",
+    "localdrive": "^2.2.0",
+    "paparam": "^1.10.0",
     "tiny-byte-size": "^1.1.0",
     "tiny-crayon": "^1.0.5",
-    "unix-path-resolve": "^1.0.2",
     "watch-drive": "^2.0.2"
   },
   "devDependencies": {
+    "b4a": "^1.7.3",
     "brittle": "^3.5.0",
-    "hyperdht": "^6.14.0",
+    "hyperdht": "^6.27.0",
     "newline-decoder": "^1.0.2",
     "standard": "^17.0.0",
     "test-tmp": "^1.2.1"
