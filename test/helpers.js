@@ -22,7 +22,7 @@ exports.setupDrive = async (storage, t) => {
   let driveKey = null
   const stdoutDec = new NewlineDecoder('utf-8')
 
-  proc.stdout.on('data', d => {
+  proc.stdout.on('data', (d) => {
     for (const line of stdoutDec.push(d)) {
       if (line.includes('New drive:')) {
         driveKey = line.split('New drive: ')[1].slice(0, 52)
@@ -45,7 +45,7 @@ exports.waitForOutput = async (proc, text, timeout = 30000) => {
     }, timeout)
 
     const stdoutDec = new NewlineDecoder('utf-8')
-    proc.stdout.on('data', d => {
+    proc.stdout.on('data', (d) => {
       for (const line of stdoutDec.push(d)) {
         if (line.includes(text)) {
           clearTimeout(timer)

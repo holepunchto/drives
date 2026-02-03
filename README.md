@@ -7,6 +7,7 @@ npm i -g drives
 ```
 
 ## Usage
+
 ```
 drives [flags] [command]
 
@@ -17,6 +18,7 @@ Commands:
 ```
 
 ## API
+
 Use `drives --help` for more information, `drives mirror --help`, etc.
 
 #### Storage
@@ -30,12 +32,14 @@ If it doesn't find anything, then it will create and use a global folder at `~/.
 You can always set `--storage [path]` to force a different location.
 
 #### Create a writable Hyperdrive
+
 ```bash
 drives touch
 # New drive: <z32 key>
 ```
 
 #### Mirror any drive into another
+
 Source and destination can be a folder path or a drive key.
 
 ```bash
@@ -43,11 +47,13 @@ drives mirror <src> <dst>
 ```
 
 Options:
+
 - `--live` for real-time mirroring
 - `--version [v]` to use a specific version
 - `--storage [path]` to specify storage location
 
 #### Seed a drive
+
 ```bash
 drives seed [my-drive-key]
 ```

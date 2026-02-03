@@ -15,12 +15,12 @@ const mirror = require('./lib/mirror.js')
 
 const DEFAULT_STORAGE = path.join(os.homedir(), '.drives', 'corestore')
 
-function findCorestore (storage) {
+function findCorestore(storage) {
   if (storage) return path.resolve(storage)
   return DEFAULT_STORAGE
 }
 
-async function stat (path) {
+async function stat(path) {
   try {
     return await fsp.stat(path)
   } catch (error) {
@@ -29,7 +29,7 @@ async function stat (path) {
   }
 }
 
-async function noticeStorage (dirname, list) {
+async function noticeStorage(dirname, list) {
   if (list) {
     const ids = list.map(driveType)
     if (!ids.includes('key')) return
@@ -38,7 +38,9 @@ async function noticeStorage (dirname, list) {
   const exists = await stat(dirname)
 
   if (exists) console.log(crayon.gray('Storage:', dirname))
-  else console.log(crayon.red('Notice:'), crayon.gray('new storage at', dirname))
+  else {
+    console.log(crayon.red('Notice:'), crayon.gray('new storage at', dirname))
+  }
 }
 
 const touchCmd = command(

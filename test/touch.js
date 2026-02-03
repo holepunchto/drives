@@ -6,7 +6,7 @@ const { once } = require('events')
 const NewlineDecoder = require('newline-decoder')
 const { spawnDrivesBin } = require('./helpers.js')
 
-test('touch creates a new drive', async t => {
+test('touch creates a new drive', async (t) => {
   const dir = await tmpDir(t)
   const storage = path.join(dir, 'storage')
 
@@ -15,7 +15,7 @@ test('touch creates a new drive', async t => {
   let driveKey = null
   const stdoutDec = new NewlineDecoder('utf-8')
 
-  proc.stdout.on('data', d => {
+  proc.stdout.on('data', (d) => {
     for (const line of stdoutDec.push(d)) {
       if (line.includes('New drive:')) {
         driveKey = line.split('New drive: ')[1].slice(0, 52)
@@ -23,7 +23,7 @@ test('touch creates a new drive', async t => {
     }
   })
 
-  proc.stderr.on('data', d => {
+  proc.stderr.on('data', (d) => {
     console.error(d.toString())
     t.fail('stderr output when touching drive')
   })

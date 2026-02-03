@@ -9,7 +9,7 @@ const Hyperswarm = require('hyperswarm')
 const b4a = require('b4a')
 const { spawnDrivesBin, waitForOutput } = require('./helpers.js')
 
-test('seed to dht and got mirror from other hyperdrive', async t => {
+test('seed to dht and got mirror from other hyperdrive', async (t) => {
   // create a hyperdrive and some dummy data
   const srcDir = await tmpDir(t)
   const srcStorage = path.join(srcDir, 'corestore')
@@ -23,7 +23,15 @@ test('seed to dht and got mirror from other hyperdrive', async t => {
   const { bootstrap } = await createTestnet(3, t.teardown)
   const bootstrapPort = bootstrap[0].port
 
-  const seedProc = spawnDrivesBin(t, 'seed', '--storage', srcStorage, '--bootstrap', bootstrapPort, IdEnc.encode(srcDrive.key))
+  const seedProc = spawnDrivesBin(
+    t,
+    'seed',
+    '--storage',
+    srcStorage,
+    '--bootstrap',
+    bootstrapPort,
+    IdEnc.encode(srcDrive.key)
+  )
 
   // Wait for the announcement
   const announced = await waitForOutput(seedProc, 'Announced', 5_000)
@@ -43,7 +51,7 @@ test('seed to dht and got mirror from other hyperdrive', async t => {
   await swarm.join(dstDrive.discoveryKey).flushed()
 
   // wait for drive to be replicated
-  await new Promise(resolve => setTimeout(resolve, 1_000))
+  await new Promise((resolve) => setTimeout(resolve, 1_000))
 
   const file = await dstDrive.get('test-file.txt')
   t.is(b4a.toString(file, 'utf8'), 'Test content')
