@@ -2,8 +2,12 @@ const { spawn } = require('child_process')
 const path = require('path')
 const NewlineDecoder = require('newline-decoder')
 const { once } = require('events')
+const { isBare } = require('which-runtime')
+if (isBare) require('bare-process/global')
 
-const EXECUTABLE = path.join(__dirname, '..', 'bin.js')
+const EXECUTABLE = isBare
+  ? path.join(__dirname, '..', 'bare-bin.js')
+  : path.join(__dirname, '..', 'bin.js')
 
 exports.spawnDrivesBin = (t, ...args) => {
   const proc = spawn(process.execPath, [EXECUTABLE, ...args])

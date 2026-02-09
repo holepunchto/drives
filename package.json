@@ -9,10 +9,12 @@
     "bin.js"
   ],
   "bin": {
-    "drives": "./bin.js"
+    "drives": "./bin.js",
+    "drives-bare": "./bin-bare.js"
   },
   "scripts": {
-    "test": "prettier --check . && lunte && brittle test/*.js"
+    "test": "prettier --check . && lunte && brittle test/*.js",
+    "test:bare": "brittle-bare test/*.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,11 @@
   "homepage": "https://github.com/holepunchto/drives",
   "dependencies": {
     "ansi-diff": "^1.1.1",
+    "bare-events": "^2.8.2",
+    "bare-fs": "^4.5.3",
+    "bare-os": "^3.6.2",
+    "bare-path": "^3.0.0",
+    "bare-process": "^4.2.2",
     "binary-stream-equals": "^1.0.0",
     "corestore": "^7.0.0",
     "graceful-goodbye": "^1.2.0",
@@ -40,12 +47,44 @@
   },
   "devDependencies": {
     "b4a": "^1.7.3",
+    "bare-subprocess": "^5.2.2",
     "brittle": "^3.5.0",
     "hyperdht": "^6.27.0",
     "lunte": "^1.6.0",
     "newline-decoder": "^1.0.2",
     "prettier": "^3.8.1",
     "prettier-config-holepunch": "^2.0.0",
-    "test-tmp": "^1.2.1"
+    "test-tmp": "^1.2.1",
+    "which-runtime": "^1.3.2"
+  },
+  "imports": {
+    "child_process": {
+      "bare": "bare-subprocess",
+      "default": "child_process"
+    },
+    "path": {
+      "bare": "bare-path",
+      "default": "path"
+    },
+    "events": {
+      "bare": "bare-events",
+      "default": "events"
+    },
+    "fs": {
+      "bare": "bare-fs",
+      "default": "fs"
+    },
+    "fs/promises": {
+      "bare": "bare-fs/promises",
+      "default": "fs/promises"
+    },
+    "process": {
+      "bare": "bare-process",
+      "default": "process"
+    },
+    "os": {
+      "bare": "bare-os",
+      "default": "os"
+    }
   }
 }
