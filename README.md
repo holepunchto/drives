@@ -69,9 +69,11 @@ Peer 2 wants to continuously pull in changes.
 #### Peer 1:
 
 Create a new Hyperdrive
+
 ```
 drives touch
 ```
+
 Output: `New drive: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
 
 Copy a local folder into the new Hyperdrive
