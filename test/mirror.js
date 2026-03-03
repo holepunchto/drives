@@ -37,6 +37,52 @@ test('mirror local to local', async (t) => {
   t.is(fileContent, 'Test content', 'file content was correctly mirrored')
 })
 
+test('mirror ignores .DS_Store by default', async (t) => {
+  const dir = await tmpDir(t)
+
+  const srcDir = path.join(dir, 'src')
+  await mkdir(srcDir)
+  await mkdir(path.join(srcDir, 'nested'))
+  await writeFile(path.join(srcDir, 'test-file.txt'), 'Test content')
+  await writeFile(path.join(srcDir, '.DS_Store'), 'ignored metadata')
+  await writeFile(path.join(srcDir, 'nested', '.DS_Store'), 'ignored nested metadata')
+
+  const dstDir = path.join(dir, 'destination')
+  await mkdir(dstDir)
+
+  const mirrorProc = spawnDrivesBin(t, 'mirror', srcDir, dstDir)
+
+  mirrorProc.stderr.on('data', (d) => {
+    console.error(d.toString())
+    t.fail('There should be no stderr in mirror')
+  })
+
+  await waitForOutput(mirrorProc, 'Total files: 1')
+
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  const fileContent = await readFile(path.join(dstDir, 'test-file.txt'), {
+    encoding: 'utf-8'
+  })
+  t.is(fileContent, 'Test content', 'regular file was mirrored')
+
+  await t.exception(
+    async () => {
+      await readFile(path.join(dstDir, '.DS_Store'), 'utf-8')
+    },
+    /ENOENT/,
+    '.DS_Store was ignored'
+  )
+
+  await t.exception(
+    async () => {
+      await readFile(path.join(dstDir, 'nested', '.DS_Store'), 'utf-8')
+    },
+    /ENOENT/,
+    'nested .DS_Store was ignored'
+  )
+})
+
 test('mirror --live flow', async (t) => {
   t.comment(
     'One process live mirrors a directory to a hyperdrive, while another process live mirrors that hyperdrive to another directory'
