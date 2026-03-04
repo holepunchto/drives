@@ -83,6 +83,105 @@ test('mirror ignores .DS_Store by default', async (t) => {
   )
 })
 
+test('mirror applies root .drivesignore patterns', async (t) => {
+  const dir = await tmpDir(t)
+
+  const srcDir = path.join(dir, 'src')
+  await mkdir(srcDir)
+  await mkdir(path.join(srcDir, 'nested'))
+  await mkdir(path.join(srcDir, 'node_modules', 'lib'), { recursive: true })
+  await mkdir(path.join(srcDir, 'nested', 'node_modules', 'lib'), { recursive: true })
+
+  const drivesignore = [
+    '#keep.txt',
+    'ignore.txt',
+    'nested/*.tmp',
+    '**/node_modules/**',
+    '**/*.log'
+  ].join('\n')
+
+  await writeFile(path.join(srcDir, '.drivesignore'), drivesignore + '\n')
+  await writeFile(path.join(srcDir, 'keep.txt'), 'keep')
+  await writeFile(path.join(srcDir, 'ignore.txt'), 'ignore')
+  await writeFile(path.join(srcDir, 'nested', 'keep.txt'), 'nested keep')
+  await writeFile(path.join(srcDir, 'nested', 'ignore.tmp'), 'nested ignore')
+  await writeFile(path.join(srcDir, 'node_modules', 'lib', 'index.js'), 'module output')
+  await writeFile(path.join(srcDir, 'nested', 'node_modules', 'lib', 'index.js'), 'nested module')
+  await writeFile(path.join(srcDir, 'debug.log'), 'root log')
+  await writeFile(path.join(srcDir, 'nested', 'debug.log'), 'nested log')
+  await writeFile(path.join(srcDir, 'nested', '.drivesignore'), 'keep.txt\n')
+
+  const dstDir = path.join(dir, 'destination')
+  await mkdir(dstDir)
+
+  const mirrorProc = spawnDrivesBin(t, 'mirror', srcDir, dstDir)
+
+  mirrorProc.stderr.on('data', (d) => {
+    console.error(d.toString())
+    t.fail('There should be no stderr in mirror')
+  })
+
+  await waitForOutput(mirrorProc, 'Total files: 4')
+
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  const keep = await readFile(path.join(dstDir, 'keep.txt'), { encoding: 'utf-8' })
+  t.is(keep, 'keep', 'line starting with # is treated as comment')
+
+  const nestedKeep = await readFile(path.join(dstDir, 'nested', 'keep.txt'), {
+    encoding: 'utf-8'
+  })
+  t.is(nestedKeep, 'nested keep', 'nested .drivesignore is not applied')
+
+  await t.exception(
+    async () => {
+      await readFile(path.join(dstDir, 'ignore.txt'), 'utf-8')
+    },
+    /ENOENT/,
+    'root ignore pattern was applied'
+  )
+
+  await t.exception(
+    async () => {
+      await readFile(path.join(dstDir, 'nested', 'ignore.tmp'), 'utf-8')
+    },
+    /ENOENT/,
+    'nested ignore pattern was applied'
+  )
+
+  await t.exception(
+    async () => {
+      await readFile(path.join(dstDir, 'node_modules', 'lib', 'index.js'), 'utf-8')
+    },
+    /ENOENT/,
+    'node_modules directory contents were ignored'
+  )
+
+  await t.exception(
+    async () => {
+      await readFile(path.join(dstDir, 'nested', 'node_modules', 'lib', 'index.js'), 'utf-8')
+    },
+    /ENOENT/,
+    'nested node_modules directory contents were ignored'
+  )
+
+  await t.exception(
+    async () => {
+      await readFile(path.join(dstDir, 'debug.log'), 'utf-8')
+    },
+    /ENOENT/,
+    'root .log file was ignored'
+  )
+
+  await t.exception(
+    async () => {
+      await readFile(path.join(dstDir, 'nested', 'debug.log'), 'utf-8')
+    },
+    /ENOENT/,
+    'nested .log file was ignored'
+  )
+})
+
 test('mirror --live flow', async (t) => {
   t.comment(
     'One process live mirrors a directory to a hyperdrive, while another process live mirrors that hyperdrive to another directory'
