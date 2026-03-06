@@ -50,6 +50,13 @@ Options:
 - `--version [v]` to use a specific version
 - `--storage [path]` to specify storage location
 
+Ignore rules:
+
+- Mirror always ignores `.DS_Store` files.
+- If the source drive root contains a `.drivesignore` file, its patterns are applied during mirror.
+- Pattern matching uses [`picomatch`](https://github.com/micromatch/picomatch), so behavior is not 100% compatible with `.gitignore`.
+- `.drivesignore` is loaded once when mirroring starts. For `--live`, restart the mirror process after changing ignore rules.
+
 It is recommended to set either the `--live` or the `--version` flag (either download changes as they come in, or download a specific version).
 
 #### Seed a drive

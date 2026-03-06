@@ -26,6 +26,7 @@
   "homepage": "https://github.com/holepunchto/drives",
   "dependencies": {
     "ansi-diff": "^1.1.1",
+    "b4a": "^1.8.0",
     "binary-stream-equals": "^1.0.0",
     "corestore": "^7.0.0",
     "graceful-goodbye": "^1.2.0",
@@ -34,12 +35,12 @@
     "hyperswarm": "^4.16.0",
     "localdrive": "^2.2.0",
     "paparam": "^1.10.0",
+    "picomatch": "^4.0.3",
     "tiny-byte-size": "^1.1.0",
     "tiny-crayon": "^1.0.5",
     "watch-drive": "^2.0.2"
   },
   "devDependencies": {
-    "b4a": "^1.7.3",
     "brittle": "^3.5.0",
     "hyperdht": "^6.27.0",
     "lunte": "^1.6.0",
