@@ -9,14 +9,14 @@
     "bin.js"
   ],
   "bin": {
-    "drives": "./bin.js"
+    "drives": "bin.js"
   },
   "scripts": {
     "test": "prettier --check . && lunte && brittle test/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/holepunchto/drives.git"
+    "url": "git+https://github.com/holepunchto/drives.git"
   },
   "author": "Holepunch",
   "license": "Apache-2.0",
