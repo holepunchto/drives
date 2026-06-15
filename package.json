@@ -13,7 +13,7 @@
     "drives-bare": "bin-bare.js"
   },
   "scripts": {
-    "test": "prettier --check . && lunte && brittle test/*.js",
+    "test": "prettier --check . && lunte && brittle-node test/*.js",
     "test:bare": "brittle-bare test/*.js"
   },
   "repository": {
@@ -48,8 +48,8 @@
     "watch-drive": "^2.0.2"
   },
   "devDependencies": {
-    "bare-subprocess": "^5.2.2",
-    "brittle": "^3.5.0",
+    "bare-subprocess": "^6.1.0",
+    "brittle": "^4.0.2",
     "hyperdht": "^6.27.0",
     "lunte": "^1.6.0",
     "newline-decoder": "^1.0.2",
