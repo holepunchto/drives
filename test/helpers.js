@@ -10,7 +10,9 @@ const EXECUTABLE = isBare
   : path.join(__dirname, '..', 'bin.js')
 
 exports.spawnDrivesBin = (t, ...args) => {
-  const proc = spawn(process.execPath, [EXECUTABLE, ...args])
+  const proc = spawn(process.execPath, [EXECUTABLE, ...args], {
+    stdio: 'overlapped'
+  })
   t.teardown(async () => {
     if (proc.exitCode === null) {
       proc.kill('SIGKILL')
