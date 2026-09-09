@@ -2,13 +2,22 @@ const { spawn } = require('child_process')
 const path = require('path')
 const NewlineDecoder = require('newline-decoder')
 const { once } = require('events')
+const { isBare } = require('which-runtime')
+const process = require('process')
 
-const EXECUTABLE = path.join(__dirname, '..', 'bin.js')
+const EXECUTABLE = isBare
+  ? path.join(__dirname, '..', 'bare-bin.js')
+  : path.join(__dirname, '..', 'bin.js')
 
 exports.spawnDrivesBin = (t, ...args) => {
-  const proc = spawn(process.execPath, [EXECUTABLE, ...args])
-  t.teardown(() => {
-    if (proc.exitCode === null) proc.kill('SIGKILL')
+  const proc = spawn(process.execPath, [EXECUTABLE, ...args], {
+    stdio: ['pipe', 'overlapped', 'overlapped']
+  })
+  t.teardown(async () => {
+    if (proc.exitCode === null) {
+      proc.kill('SIGKILL')
+      await once(proc, 'close')
+    }
   })
   process.on('exit', () => {
     if (proc.exitCode === null) proc.kill('SIGKILL')
